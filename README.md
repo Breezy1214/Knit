@@ -16,16 +16,11 @@ Read the [documentation](https://sleitnick.github.io/Knit/) for more info.
 
 ## Install
 
-Installing Knit is very simple. Just drop the module into ReplicatedStorage. Knit can also be used within a Rojo project.
-
-**Roblox Studio workflow:**
-
-1. Get [Knit](https://www.roblox.com/library/5530714855/Knit) from the Roblox library.
-1. Place Knit directly within ReplicatedStorage.
+Installing Knit is very simple.
 
 **Wally & Rojo workflow:**
 
-1. Add Knit as a Wally dependency (e.g. `Knit = "Breezy1214/knit@^1"`)
+1. Add Knit as a Wally dependency (e.g. `Knit = "breezy1214/knit@^1"`)
 1. Use Rojo to point the Wally packages to ReplicatedStorage.
 
 ## Basic Usage

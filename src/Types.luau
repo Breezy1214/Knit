@@ -12,7 +12,7 @@ export type MiddlewareServer = {
 }
 
 --[=[
-	@export type ServerMiddlewareFn (player: Player, args: {any}) -> (shouldContinue: boolean, ...: any)
+	@type ServerMiddlewareFn (player: Player, args: {any}) -> (shouldContinue: boolean, ...: any)
 	@within KnitServer
 
 	For more info, see [ServerComm](https://sleitnick.github.io/RbxUtil/api/ServerComm/) documentation.
@@ -20,7 +20,7 @@ export type MiddlewareServer = {
 export type ServerMiddlewareFn = (player: Player, args: { any }) -> (boolean, ...any)
 
 --[=[
-	@export type ServerMiddleware {ServerMiddlewareFn}
+	@type ServerMiddleware {ServerMiddlewareFn}
 	@within KnitServer
 	An array of server middleware functions.
 ]=]
@@ -85,7 +85,7 @@ export type KnitServerOptions = {
 }
 
 --[=[
-	@export type ClientMiddlewareFn (args: {any}) -> (shouldContinue: boolean, ...: any)
+	@type ClientMiddlewareFn (args: {any}) -> (shouldContinue: boolean, ...: any)
 	@within KnitClient
 
 	For more info, see [ClientComm](https://sleitnick.github.io/RbxUtil/api/ClientComm/) documentation.
@@ -93,14 +93,14 @@ export type KnitServerOptions = {
 export type ClientMiddlewareFn = (args: { any }) -> (boolean, ...any)
 
 --[=[
-	@export type ClientMiddleware {ClientMiddlewareFn}
+	@type ClientMiddleware {ClientMiddlewareFn}
 	@within KnitClient
 	An array of client middleware functions.
 ]=]
 export type ClientMiddleware = { ClientMiddlewareFn }
 
 --[=[
-	@export type PerServiceMiddleware {[string]: Middleware}
+	@type PerServiceMiddleware {[string]: Middleware}
 	@within KnitClient
 ]=]
 export type PerServiceMiddleware = { [string]: MiddlewareServer }
