@@ -1,5 +1,5 @@
 [package]
-name = "sleitnick/knit"
+name = "breezy1214/knit"
 description = "Knit is a lightweight game framework"
 version = "1.7.0"
 license = "MIT"
@@ -9,3 +9,4 @@ realm = "shared"
 [dependencies]
 Comm = "sleitnick/comm@^1"
 Promise = "evaera/promise@^4"
+Loader = "sleitnick/loader@2.0.0"

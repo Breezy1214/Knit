@@ -7,7 +7,7 @@ logo/discord.png
 site/
 *.rbxlx
 *.rbxl
-*.rbxl.lock
+*.lock
 *.rbxmx
 *.rbxm
 Packages/

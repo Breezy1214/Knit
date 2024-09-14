@@ -1,88 +1,14 @@
---[=[
-	@interface Middleware
-	.Inbound ServerMiddleware?
-	.Outbound ServerMiddleware?
-	@within KnitServer
-]=]
-type Middleware = {
-	Inbound: ServerMiddleware?,
-	Outbound: ServerMiddleware?,
-}
+local Types = require(script.Parent.Types)
 
---[=[
-	@type ServerMiddlewareFn (player: Player, args: {any}) -> (shouldContinue: boolean, ...: any)
-	@within KnitServer
+export type Middleware = Types.MiddlewareServer
+export type ServerMiddlewareFn = Types.ServerMiddlewareFn
+export type ServerMiddleware = Types.ServerMiddleware
+export type ServiceDef = Types.ServiceDef
+export type Service = Types.Service
+export type ServiceClient = Types.ServiceClient
+export type KnitServerOptions = Types.KnitServerOptions
 
-	For more info, see [ServerComm](https://sleitnick.github.io/RbxUtil/api/ServerComm/) documentation.
-]=]
-type ServerMiddlewareFn = (player: Player, args: { any }) -> (boolean, ...any)
-
---[=[
-	@type ServerMiddleware {ServerMiddlewareFn}
-	@within KnitServer
-	An array of server middleware functions.
-]=]
-type ServerMiddleware = { ServerMiddlewareFn }
-
---[=[
-	@interface ServiceDef
-	.Name string
-	.Client table?
-	.Middleware Middleware?
-	.[any] any
-	@within KnitServer
-	Used to define a service when creating it in `CreateService`.
-
-	The middleware tables provided will be used instead of the Knit-level
-	middleware (if any). This allows fine-tuning each service's middleware.
-	These can also be left out or `nil` to not include middleware.
-]=]
-type ServiceDef = {
-	Name: string,
-	Client: { [any]: any }?,
-	Middleware: Middleware?,
-	[any]: any,
-}
-
---[=[
-	@interface Service
-	.Name string
-	.Client ServiceClient
-	.KnitComm Comm
-	.[any] any
-	@within KnitServer
-]=]
-type Service = {
-	Name: string,
-	Client: ServiceClient,
-	KnitComm: any,
-	[any]: any,
-}
-
---[=[
-	@interface ServiceClient
-	.Server Service
-	.[any] any
-	@within KnitServer
-]=]
-type ServiceClient = {
-	Server: Service,
-	[any]: any,
-}
-
---[=[
-	@interface KnitOptions
-	.Middleware Middleware?
-	@within KnitServer
-
-	- Middleware will apply to all services _except_ ones that define
-	their own middleware.
-]=]
-type KnitOptions = {
-	Middleware: Middleware?,
-}
-
-local defaultOptions: KnitOptions = {
+local defaultOptions: KnitServerOptions = {
 	Middleware = nil,
 }
 
@@ -120,21 +46,21 @@ local KnitServer = {}
 KnitServer.Util = (script.Parent :: Instance).Parent
 
 local SIGNAL_MARKER = newproxy(true)
-getmetatable(SIGNAL_MARKER).__tostring = function()
+getmetatable(SIGNAL_MARKER).__tostring = function(): string
 	return "SIGNAL_MARKER"
 end
 
 local UNRELIABLE_SIGNAL_MARKER = newproxy(true)
-getmetatable(UNRELIABLE_SIGNAL_MARKER).__tostring = function()
+getmetatable(UNRELIABLE_SIGNAL_MARKER).__tostring = function(): string
 	return "UNRELIABLE_SIGNAL_MARKER"
 end
 
 local PROPERTY_MARKER = newproxy(true)
-getmetatable(PROPERTY_MARKER).__tostring = function()
+getmetatable(PROPERTY_MARKER).__tostring = function(): string
 	return "PROPERTY_MARKER"
 end
 
-local knitRepServiceFolder = Instance.new("Folder")
+local knitRepServiceFolder: Folder = Instance.new("Folder")
 knitRepServiceFolder.Name = "Services"
 
 local Promise = require(KnitServer.Util.Promise)
@@ -381,7 +307,7 @@ end
 	end):catch(warn)
 	```
 ]=]
-function KnitServer.Start(options: KnitOptions?)
+function KnitServer.Start(options: KnitServerOptions?)
 	if started then
 		return Promise.reject("Knit already started")
 	end

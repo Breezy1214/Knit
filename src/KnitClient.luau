@@ -1,85 +1,15 @@
---[=[
-	@interface Middleware
-	.Inbound ClientMiddleware?
-	.Outbound ClientMiddleware?
-	@within KnitClient
-]=]
-type Middleware = {
-	Inbound: ClientMiddleware?,
-	Outbound: ClientMiddleware?,
-}
+local Types = require(script.Parent.Types)
 
---[=[
-	@type ClientMiddlewareFn (args: {any}) -> (shouldContinue: boolean, ...: any)
-	@within KnitClient
+export type Middleware = Types.MiddlewareClient
+export type ClientMiddlewareFn = Types.ClientMiddlewareFn
+export type ClientMiddleware = Types.ClientMiddleware
+export type PerServiceMiddleware = Types.PerServiceMiddleware
+export type ControllerDef = Types.ControllerDef
+export type Controller = Types.Controller
+export type ClientService = Types.ClientService
+export type KnitClientOptions = Types.KnitClientOptions
 
-	For more info, see [ClientComm](https://sleitnick.github.io/RbxUtil/api/ClientComm/) documentation.
-]=]
-type ClientMiddlewareFn = (args: { any }) -> (boolean, ...any)
-
---[=[
-	@type ClientMiddleware {ClientMiddlewareFn}
-	@within KnitClient
-	An array of client middleware functions.
-]=]
-type ClientMiddleware = { ClientMiddlewareFn }
-
---[=[
-	@type PerServiceMiddleware {[string]: Middleware}
-	@within KnitClient
-]=]
-type PerServiceMiddleware = { [string]: Middleware }
-
---[=[
-	@interface ControllerDef
-	.Name string
-	.[any] any
-	@within KnitClient
-	Used to define a controller when creating it in `CreateController`.
-]=]
-type ControllerDef = {
-	Name: string,
-	[any]: any,
-}
-
---[=[
-	@interface Controller
-	.Name string
-	.[any] any
-	@within KnitClient
-]=]
-type Controller = {
-	Name: string,
-	[any]: any,
-}
-
---[=[
-	@interface Service
-	.[any] any
-	@within KnitClient
-]=]
-type Service = {
-	[any]: any,
-}
-
---[=[
-	@interface KnitOptions
-	.ServicePromises boolean?
-	.Middleware Middleware?
-	.PerServiceMiddleware PerServiceMiddleware?
-	@within KnitClient
-
-	- `ServicePromises` defaults to `true` and indicates if service methods use promises.
-	- Each service will go through the defined middleware, unless the service
-	has middleware defined in `PerServiceMiddleware`.
-]=]
-type KnitOptions = {
-	ServicePromises: boolean,
-	Middleware: Middleware?,
-	PerServiceMiddleware: PerServiceMiddleware?,
-}
-
-local defaultOptions: KnitOptions = {
+local defaultOptions: KnitClientOptions = {
 	ServicePromises = true,
 	Middleware = nil,
 	PerServiceMiddleware = {},
@@ -117,7 +47,7 @@ local Comm = require(KnitClient.Util.Comm)
 local ClientComm = Comm.ClientComm
 
 local controllers: { [string]: Controller } = {}
-local services: { [string]: Service } = {}
+local services: { [string]: ClientService } = {}
 local servicesFolder = nil
 
 local started = false
@@ -282,7 +212,7 @@ end
 	expose remote-based content on their Client tables.
 	:::
 ]=]
-function KnitClient.GetService(serviceName: string): Service
+function KnitClient.GetService(serviceName: string): ClientService
 	local service = services[serviceName]
 	if service then
 		return service
@@ -335,7 +265,7 @@ end
 	end):catch(warn)
 	```
 ]=]
-function KnitClient.Start(options: KnitOptions?)
+function KnitClient.Start(options: KnitClientOptions?)
 	if started then
 		return Promise.reject("Knit already started")
 	end
