@@ -86,28 +86,7 @@ local function BuildService(serviceName: string)
 	return service
 end
 
---[=[
-	Creates a new controller.
-
-	:::caution
-	Controllers must be created _before_ calling `Knit.Start()`.
-	:::
-	```lua
-	-- Create a controller
-	local MyController = Knit.CreateController {
-		Name = "MyController",
-	}
-
-	function MyController:KnitStart()
-		print("MyController started")
-	end
-
-	function MyController:KnitInit()
-		print("MyController initialized")
-	end
-	```
-]=]
-function KnitClient.CreateController(controllerDef: ControllerDef): Controller
+local function createController(controllerDef: ControllerDef): Controller
 	assert(type(controllerDef) == "table", `Controller must be a table; got {type(controllerDef)}`)
 	assert(type(controllerDef.Name) == "string", `Controller.Name must be a string; got {type(controllerDef.Name)}`)
 	assert(#controllerDef.Name > 0, "Controller.Name must be a non-empty string")
@@ -136,7 +115,9 @@ function KnitClient.AddControllers(parent: Instance): { Controller }
 			continue
 		end
 
-		table.insert(addedControllers, require(v))
+		local controllerDef: ControllerDef = require(v)
+		local controller: Controller = createController(controllerDef)
+		table.insert(addedControllers, controller)
 	end
 
 	return addedControllers
@@ -154,7 +135,9 @@ function KnitClient.AddControllersDeep(parent: Instance): { Controller }
 			continue
 		end
 
-		table.insert(addedControllers, require(v))
+		local controllerDef: ControllerDef = require(v)
+		local controller: Controller = createController(controllerDef)
+		table.insert(addedControllers, controller)
 	end
 
 	return addedControllers

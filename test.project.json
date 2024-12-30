@@ -13,8 +13,33 @@
 			"Packages": {
 				"$className": "Folder",
 				"Knit": {
-                    "$path": "src"
-                }   
+					"$path": "src"
+				}
+			},
+
+			"Controllers": {
+				"$path": "Test/Controllers"
+			}
+		},
+
+		"StarterPlayer": {
+			"$className": "StarterPlayer",
+			"StarterPlayerScripts": {
+				"$className": "StarterPlayerScripts",
+				"Client": {
+					"$path": "Test/Client.client.luau"
+				}
+			}
+		},
+
+		"ServerScriptService": {
+			"$className": "ServerScriptService",
+			"Services": {
+				"$path": "Test/Services"
+			},
+
+			"Server": {
+				"$path": "Test/Server.server.luau"
 			}
 		}
 	}

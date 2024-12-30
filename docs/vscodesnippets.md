@@ -144,7 +144,7 @@ Reference Knit, create a controller, and return the controller.
 	"body": [
 		"local Knit = require(ReplicatedStorage.Packages.Knit)",
 		"",
-		"local ${0:$TM_FILENAME_BASE} = Knit.CreateController { Name = \"${0:$TM_FILENAME_BASE}\" }",
+		"local ${0:$TM_FILENAME_BASE} = { Name = \"${0:$TM_FILENAME_BASE}\" }",
 		"",
 		"",
 		"function ${0:$TM_FILENAME_BASE}:KnitStart()",
@@ -171,7 +171,7 @@ Reference Knit, create a controller, and return the controller.
 ```lua
 local Knit = require(ReplicatedStorage.Packages.Knit)
 
-local MyController = Knit.CreateController {
+local MyController = {
 	Name = "MyController",
 }
 
@@ -346,7 +346,7 @@ All the above snippets together.
 		"body": [
 			"local Knit = require(ReplicatedStorage.Packages.Knit)",
 			"",
-			"local ${0:$TM_FILENAME_BASE} = Knit.CreateController { Name = \"${0:$TM_FILENAME_BASE}\" }",
+			"local ${0:$TM_FILENAME_BASE} = { Name = \"${0:$TM_FILENAME_BASE}\" }",
 			"",
 			"",
 			"function ${0:$TM_FILENAME_BASE}:KnitStart()",

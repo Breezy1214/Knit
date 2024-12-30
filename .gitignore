@@ -13,5 +13,6 @@ site/
 Packages/
 src/Packages/
 src/wally.lock
+/test
 build/
 sourcemap.json
