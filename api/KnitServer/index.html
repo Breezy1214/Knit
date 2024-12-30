@@ -30,8 +30,8 @@ Knit.Start():andThen(function()
 	print(&quot;Knit started&quot;)
 end):catch(warn)
 ```"><link data-rh="true" rel="icon" href="/Knit/favicon.png"><link data-rh="true" rel="canonical" href="https://Breezy1214.github.io/Knit/api/KnitServer"><link data-rh="true" rel="alternate" href="https://Breezy1214.github.io/Knit/api/KnitServer" hreflang="en"><link data-rh="true" rel="alternate" href="https://Breezy1214.github.io/Knit/api/KnitServer" hreflang="x-default"><link rel="stylesheet" href="/Knit/assets/css/styles.d68860a6.css">
-<link rel="preload" href="/Knit/assets/js/runtime~main.72a8a6fc.js" as="script">
-<link rel="preload" href="/Knit/assets/js/main.070aae6f.js" as="script">
+<link rel="preload" href="/Knit/assets/js/runtime~main.92eb349c.js" as="script">
+<link rel="preload" href="/Knit/assets/js/main.0f84a2b3.js" as="script">
 </head>
 <body class="navigation-with-keyboard">
 <script>!function(){function e(e){document.documentElement.setAttribute("data-theme",e)}var t=function(){var e=null;try{e=localStorage.getItem("theme")}catch(e){}return e}();null!==t?e(t):window.matchMedia("(prefers-color-scheme: dark)").matches?e("dark"):(window.matchMedia("(prefers-color-scheme: light)").matches,e("light"))}()</script><div id="__docusaurus">
@@ -55,7 +55,7 @@ Knit<span class="token punctuation">.</span><span class="token function">Start</
 </div><div class="divider_rE5g"></div><h3 class="anchor anchorWithStickyNavbar_LWe7" id="ServerMiddleware"><code style="text-decoration:none">ServerMiddleware</code><a href="#ServerMiddleware" class="hash-link" aria-label="Direct link to ServerMiddleware" title="Direct link to ServerMiddleware">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/master/src/Types.luau#L27"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code class="purple_ieR2">type</code> <code>ServerMiddleware<!-- --> = </code> <code class="purple_ieR2">{</code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/ServerComm#ServerMiddlewareFn">ServerMiddlewareFn</a></code><code class="purple_ieR2">}</code></div><div>
 <p>An array of server middleware functions.</p>
 </div><div class="divider_rE5g"></div><h3 class="anchor anchorWithStickyNavbar_LWe7" id="ServiceDef"><code style="text-decoration:none">ServiceDef</code><a href="#ServiceDef" class="hash-link" aria-label="Direct link to ServiceDef" title="Direct link to ServiceDef">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/master/src/Types.luau#L42"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code class="purple_ieR2">interface</code> <code>ServiceDef<!-- --> <!-- -->{</code><div class="inset_uKQm"><div><code>Name<!-- -->: </code><code class="blue_P4bS">string</code></div><div><code>Client<!-- -->: </code><code class="blue_P4bS">table?</code></div><div><code>Middleware<!-- -->: </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/KnitServer#Middleware">Middleware?</a></code></div><div><code>[any]<!-- -->: </code><code class="blue_P4bS">any</code></div></div><code>}</code></div><div>
-<p>Used to define a service when creating it in <code>CreateService</code>.</p>
+<p>Used to define a service when creating it.</p>
 <p>
   The middleware tables provided will be used instead of the Knit-level
   middleware (if any). This allows fine-tuning each service's middleware.
@@ -75,53 +75,20 @@ Knit<span class="token punctuation">.</span><span class="token function">Start</
   pulled in via Wally instead of relying on Knit's Util folder, as this
   folder only contains what is necessary for Knit to run in Wally mode.
 </p>
-</div><h2 class="anchor anchorWithStickyNavbar_LWe7" id="functions">Functions<a href="#functions" class="hash-link" aria-label="Direct link to Functions" title="Direct link to Functions">​</a></h2><div class="divider_rE5g"></div><h3 class="anchor anchorWithStickyNavbar_LWe7" id="CreateService"><code style="text-decoration:none">CreateService</code><a href="#CreateService" class="hash-link" aria-label="Direct link to CreateService" title="Direct link to CreateService">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/master/src/KnitServer.luau#L110"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code>KnitServer<!-- -->.</code><code class="green_DgR4">CreateService</code><code>(</code><code>serviceDef<!-- -->: </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/KnitServer#ServiceDef">ServiceDef</a></code><code>) → </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/KnitServer#Service">Service</a></code></div><div>
-<p>Constructs a new service.</p>
-<div class="admonition admonition-caution alert alert--warning">
-  <div class="admonition-heading">
-    <h5><span class="admonition-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-          <path d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"></path>
-        </svg></span>caution</h5>
-  </div>
-  <div class="admonition-content">
-    <p>Services must be created <em>before</em> calling <code>Knit.Start()</code>.</p>
-  </div>
-</div>
-<pre class="language-lua"><code class="language-lua"><span class="token comment">-- Create a service</span>
-<span class="token keyword">local</span> MyService <span class="token operator">=</span> Knit<span class="token punctuation">.</span><span class="token function">CreateService</span> <span class="token punctuation">{</span>
-	Name <span class="token operator">=</span> <span class="token string">"MyService"</span><span class="token punctuation">,</span>
-	Client <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
-<span class="token punctuation">}</span>
-
-<span class="token comment">-- Expose a ToAllCaps remote function to the clients</span>
-<span class="token keyword">function</span> MyService<span class="token punctuation">.</span>Client<span class="token punctuation">:</span><span class="token function">ToAllCaps</span><span class="token punctuation">(</span>player<span class="token punctuation">,</span> msg<span class="token punctuation">)</span>
-	<span class="token keyword">return</span> msg<span class="token punctuation">:</span><span class="token function">upper</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token keyword">end</span>
-
-<span class="token comment">-- Knit will call KnitStart after all services have been initialized</span>
-<span class="token keyword">function</span> MyService<span class="token punctuation">:</span><span class="token function">KnitStart</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-	<span class="token function">print</span><span class="token punctuation">(</span><span class="token string">"MyService started"</span><span class="token punctuation">)</span>
-<span class="token keyword">end</span>
-
-<span class="token comment">-- Knit will call KnitInit when Knit is first started</span>
-<span class="token keyword">function</span> MyService<span class="token punctuation">:</span><span class="token function">KnitInit</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-	<span class="token function">print</span><span class="token punctuation">(</span><span class="token string">"MyService initialize"</span><span class="token punctuation">)</span>
-<span class="token keyword">end</span>
-</code></pre>
-</div><div class="divider_rE5g"></div><h3 class="anchor anchorWithStickyNavbar_LWe7" id="AddServices"><code style="text-decoration:none">AddServices</code><a href="#AddServices" class="hash-link" aria-label="Direct link to AddServices" title="Direct link to AddServices">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/master/src/KnitServer.luau#L140"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code>KnitServer<!-- -->.</code><code class="green_DgR4">AddServices</code><code>(</code><code>parent<!-- -->: </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="https://developer.roblox.com/en-us/api-reference/datatype/Instance" target="_blank" rel="noopener noreferrer">Instance<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound" style="color:gray;vertical-align:middle;margin-left:2px"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></code><code>) → </code><code class="purple_ieR2">{</code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/KnitServer#Service">Service</a></code><code class="purple_ieR2">}</code></div><div>
+</div><h2 class="anchor anchorWithStickyNavbar_LWe7" id="functions">Functions<a href="#functions" class="hash-link" aria-label="Direct link to Functions" title="Direct link to Functions">​</a></h2><div class="divider_rE5g"></div><h3 class="anchor anchorWithStickyNavbar_LWe7" id="AddServices"><code style="text-decoration:none">AddServices</code><a href="#AddServices" class="hash-link" aria-label="Direct link to AddServices" title="Direct link to AddServices">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/master/src/KnitServer.luau#L111"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code>KnitServer<!-- -->.</code><code class="green_DgR4">AddServices</code><code>(</code><code>parent<!-- -->: </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="https://developer.roblox.com/en-us/api-reference/datatype/Instance" target="_blank" rel="noopener noreferrer">Instance<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound" style="color:gray;vertical-align:middle;margin-left:2px"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></code><code>) → </code><code class="purple_ieR2">{</code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/KnitServer#Service">Service</a></code><code class="purple_ieR2">}</code></div><div>
 <p>
   Requires all the modules that are children of the given parent. This is an easy
   way to quickly load all services that might be in a folder.
 </p>
 <pre class="language-lua"><code class="language-lua">Knit<span class="token punctuation">.</span><span class="token function">AddServices</span><span class="token punctuation">(</span>somewhere<span class="token punctuation">.</span>Services<span class="token punctuation">)</span>
 </code></pre>
-</div><div class="divider_rE5g"></div><h3 class="anchor anchorWithStickyNavbar_LWe7" id="AddServicesDeep"><code style="text-decoration:none">AddServicesDeep</code><a href="#AddServicesDeep" class="hash-link" aria-label="Direct link to AddServicesDeep" title="Direct link to AddServicesDeep">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/master/src/KnitServer.luau#L158"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code>KnitServer<!-- -->.</code><code class="green_DgR4">AddServicesDeep</code><code>(</code><code>parent<!-- -->: </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="https://developer.roblox.com/en-us/api-reference/datatype/Instance" target="_blank" rel="noopener noreferrer">Instance<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound" style="color:gray;vertical-align:middle;margin-left:2px"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></code><code>) → </code><code class="purple_ieR2">{</code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/KnitServer#Service">Service</a></code><code class="purple_ieR2">}</code></div><div>
+</div><div class="divider_rE5g"></div><h3 class="anchor anchorWithStickyNavbar_LWe7" id="AddServicesDeep"><code style="text-decoration:none">AddServicesDeep</code><a href="#AddServicesDeep" class="hash-link" aria-label="Direct link to AddServicesDeep" title="Direct link to AddServicesDeep">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/master/src/KnitServer.luau#L131"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code>KnitServer<!-- -->.</code><code class="green_DgR4">AddServicesDeep</code><code>(</code><code>parent<!-- -->: </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="https://developer.roblox.com/en-us/api-reference/datatype/Instance" target="_blank" rel="noopener noreferrer">Instance<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound" style="color:gray;vertical-align:middle;margin-left:2px"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></code><code>) → </code><code class="purple_ieR2">{</code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/KnitServer#Service">Service</a></code><code class="purple_ieR2">}</code></div><div>
 <p>Requires all the modules that are descendants of the given parent.</p>
-</div><div class="divider_rE5g"></div><h3 class="anchor anchorWithStickyNavbar_LWe7" id="GetService"><code style="text-decoration:none">GetService</code><a href="#GetService" class="hash-link" aria-label="Direct link to GetService" title="Direct link to GetService">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/master/src/KnitServer.luau#L176"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code>KnitServer<!-- -->.</code><code class="green_DgR4">GetService</code><code>(</code><code>serviceName<!-- -->: </code><code class="blue_P4bS">string</code><code>) → </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/KnitServer#Service">Service</a></code></div><div>
+</div><div class="divider_rE5g"></div><h3 class="anchor anchorWithStickyNavbar_LWe7" id="GetService"><code style="text-decoration:none">GetService</code><a href="#GetService" class="hash-link" aria-label="Direct link to GetService" title="Direct link to GetService">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/master/src/KnitServer.luau#L151"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code>KnitServer<!-- -->.</code><code class="green_DgR4">GetService</code><code>(</code><code>serviceName<!-- -->: </code><code class="blue_P4bS">string</code><code>) → </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/KnitServer#Service">Service</a></code></div><div>
 <p>Gets the service by name. Throws an error if the service is not found.</p>
-</div><div class="divider_rE5g"></div><h3 class="anchor anchorWithStickyNavbar_LWe7" id="GetServices"><code style="text-decoration:none">GetServices</code><a href="#GetServices" class="hash-link" aria-label="Direct link to GetServices" title="Direct link to GetServices">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/master/src/KnitServer.luau#L186"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code>KnitServer<!-- -->.</code><code class="green_DgR4">GetServices</code><code>(</code><code>) → </code><code class="purple_ieR2">{</code><span><code>[</code><code class="blue_P4bS">string</code><code>]</code></span><code>: </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/KnitServer#Service">Service</a></code><code class="purple_ieR2">}</code></div><div>
+</div><div class="divider_rE5g"></div><h3 class="anchor anchorWithStickyNavbar_LWe7" id="GetServices"><code style="text-decoration:none">GetServices</code><a href="#GetServices" class="hash-link" aria-label="Direct link to GetServices" title="Direct link to GetServices">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/master/src/KnitServer.luau#L161"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code>KnitServer<!-- -->.</code><code class="green_DgR4">GetServices</code><code>(</code><code>) → </code><code class="purple_ieR2">{</code><span><code>[</code><code class="blue_P4bS">string</code><code>]</code></span><code>: </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/KnitServer#Service">Service</a></code><code class="purple_ieR2">}</code></div><div>
 <p>Gets a table of all services.</p>
-</div><div class="divider_rE5g"></div><h3 class="anchor anchorWithStickyNavbar_LWe7" id="CreateSignal"><code style="text-decoration:none">CreateSignal</code><a href="#CreateSignal" class="hash-link" aria-label="Direct link to CreateSignal" title="Direct link to CreateSignal">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/master/src/KnitServer.luau#L216"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code>KnitServer<!-- -->.</code><code class="green_DgR4">CreateSignal</code><code>(</code><code>) → </code><code class="blue_P4bS">SIGNAL_MARKER</code></div><div>
+</div><div class="divider_rE5g"></div><h3 class="anchor anchorWithStickyNavbar_LWe7" id="CreateSignal"><code style="text-decoration:none">CreateSignal</code><a href="#CreateSignal" class="hash-link" aria-label="Direct link to CreateSignal" title="Direct link to CreateSignal">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/master/src/KnitServer.luau#L191"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code>KnitServer<!-- -->.</code><code class="green_DgR4">CreateSignal</code><code>(</code><code>) → </code><code class="blue_P4bS">SIGNAL_MARKER</code></div><div>
 <p>
   Returns a marker that will transform the current key into
   a RemoteSignal once the service is created. Should only
@@ -131,7 +98,7 @@ Knit<span class="token punctuation">.</span><span class="token function">Start</
   See <a href="https://sleitnick.github.io/RbxUtil/api/RemoteSignal" target="_blank">RemoteSignal</a>
   documentation for more info.
 </p>
-<pre class="language-lua"><code class="language-lua"><span class="token keyword">local</span> MyService <span class="token operator">=</span> Knit<span class="token punctuation">.</span><span class="token function">CreateService</span> <span class="token punctuation">{</span>
+<pre class="language-lua"><code class="language-lua"><span class="token keyword">local</span> MyService <span class="token operator">=</span> <span class="token punctuation">{</span>
 	Name <span class="token operator">=</span> <span class="token string">"MyService"</span><span class="token punctuation">,</span>
 	Client <span class="token operator">=</span> <span class="token punctuation">{</span>
 		<span class="token comment">-- Create the signal marker, which will turn into a</span>
@@ -145,7 +112,7 @@ Knit<span class="token punctuation">.</span><span class="token function">Start</
 	self<span class="token punctuation">.</span>Client<span class="token punctuation">.</span>MySignal<span class="token punctuation">:</span><span class="token function">Connect</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>player<span class="token punctuation">,</span> <span class="token punctuation">...</span><span class="token punctuation">)</span> <span class="token keyword">end</span><span class="token punctuation">)</span>
 <span class="token keyword">end</span>
 </code></pre>
-</div><div class="divider_rE5g"></div><h3 class="anchor anchorWithStickyNavbar_LWe7" id="CreateUnreliableSignal"><code style="text-decoration:none">CreateUnreliableSignal</code><a href="#CreateUnreliableSignal" class="hash-link" aria-label="Direct link to CreateUnreliableSignal" title="Direct link to CreateUnreliableSignal">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/master/src/KnitServer.luau#L239"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code>KnitServer<!-- -->.</code><code class="green_DgR4">CreateUnreliableSignal</code><code>(</code><code>) → </code><code class="blue_P4bS">UNRELIABLE_SIGNAL_MARKER</code></div><div>
+</div><div class="divider_rE5g"></div><h3 class="anchor anchorWithStickyNavbar_LWe7" id="CreateUnreliableSignal"><code style="text-decoration:none">CreateUnreliableSignal</code><a href="#CreateUnreliableSignal" class="hash-link" aria-label="Direct link to CreateUnreliableSignal" title="Direct link to CreateUnreliableSignal">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/master/src/KnitServer.luau#L214"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code>KnitServer<!-- -->.</code><code class="green_DgR4">CreateUnreliableSignal</code><code>(</code><code>) → </code><code class="blue_P4bS">UNRELIABLE_SIGNAL_MARKER</code></div><div>
 <p>
   Returns a marker that will transform the current key into
   an unreliable RemoteSignal once the service is created. Should
@@ -174,7 +141,7 @@ Knit<span class="token punctuation">.</span><span class="token function">Start</
     </p>
   </div>
 </div>
-</div><div class="divider_rE5g"></div><h3 class="anchor anchorWithStickyNavbar_LWe7" id="CreateProperty"><code style="text-decoration:none">CreateProperty</code><a href="#CreateProperty" class="hash-link" aria-label="Direct link to CreateProperty" title="Direct link to CreateProperty">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/master/src/KnitServer.luau#L272"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code>KnitServer<!-- -->.</code><code class="green_DgR4">CreateProperty</code><code>(</code><code>initialValue<!-- -->: </code><code class="blue_P4bS">any</code><code>) → </code><code class="blue_P4bS">PROPERTY_MARKER</code></div><div>
+</div><div class="divider_rE5g"></div><h3 class="anchor anchorWithStickyNavbar_LWe7" id="CreateProperty"><code style="text-decoration:none">CreateProperty</code><a href="#CreateProperty" class="hash-link" aria-label="Direct link to CreateProperty" title="Direct link to CreateProperty">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/master/src/KnitServer.luau#L247"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code>KnitServer<!-- -->.</code><code class="green_DgR4">CreateProperty</code><code>(</code><code>initialValue<!-- -->: </code><code class="blue_P4bS">any</code><code>) → </code><code class="blue_P4bS">PROPERTY_MARKER</code></div><div>
 <p>
   Returns a marker that will transform the current key into
   a RemoteProperty once the service is created. Should only
@@ -189,7 +156,7 @@ Knit<span class="token punctuation">.</span><span class="token function">Start</
   See <a href="https://sleitnick.github.io/RbxUtil/api/RemoteProperty" target="_blank">RemoteProperty</a>
   documentation for more info.
 </p>
-<pre class="language-lua"><code class="language-lua"><span class="token keyword">local</span> MyService <span class="token operator">=</span> Knit<span class="token punctuation">.</span><span class="token function">CreateService</span> <span class="token punctuation">{</span>
+<pre class="language-lua"><code class="language-lua"><span class="token keyword">local</span> MyService <span class="token operator">=</span> <span class="token punctuation">{</span>
 	Name <span class="token operator">=</span> <span class="token string">"MyService"</span><span class="token punctuation">,</span>
 	Client <span class="token operator">=</span> <span class="token punctuation">{</span>
 		<span class="token comment">-- Create the property marker, which will turn into a</span>
@@ -203,7 +170,7 @@ Knit<span class="token punctuation">.</span><span class="token function">Start</
 	self<span class="token punctuation">.</span>Client<span class="token punctuation">.</span>MyProperty<span class="token punctuation">:</span><span class="token function">Set</span><span class="token punctuation">(</span><span class="token string">"HelloWorldAgain"</span><span class="token punctuation">)</span>
 <span class="token keyword">end</span>
 </code></pre>
-</div><div class="divider_rE5g"></div><h3 class="anchor anchorWithStickyNavbar_LWe7" id="Start"><code style="text-decoration:none">Start</code><a href="#Start" class="hash-link" aria-label="Direct link to Start" title="Direct link to Start">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/master/src/KnitServer.luau#L310"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code>KnitServer<!-- -->.</code><code class="green_DgR4">Start</code><code>(</code><code>options<!-- -->: </code><code class="blue_P4bS">KnitServerOptions?</code><code>) → </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/Promise">Promise</a></code></div><div>
+</div><div class="divider_rE5g"></div><h3 class="anchor anchorWithStickyNavbar_LWe7" id="Start"><code style="text-decoration:none">Start</code><a href="#Start" class="hash-link" aria-label="Direct link to Start" title="Direct link to Start">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/master/src/KnitServer.luau#L285"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code>KnitServer<!-- -->.</code><code class="green_DgR4">Start</code><code>(</code><code>options<!-- -->: </code><code class="blue_P4bS">KnitServerOptions?</code><code>) → </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/Promise">Promise</a></code></div><div>
 <p>Starts Knit. Should only be called once.</p>
 <p>
   Optionally, <code>KnitOptions</code> can be passed in order to set
@@ -240,7 +207,7 @@ Knit<span class="token punctuation">.</span><span class="token function">Start</
 	<span class="token function">print</span><span class="token punctuation">(</span><span class="token string">"Knit started!"</span><span class="token punctuation">)</span>
 <span class="token keyword">end</span><span class="token punctuation">)</span><span class="token punctuation">:</span><span class="token function">catch</span><span class="token punctuation">(</span>warn<span class="token punctuation">)</span>
 </code></pre>
-</div><div class="divider_rE5g"></div><h3 class="anchor anchorWithStickyNavbar_LWe7" id="OnStart"><code style="text-decoration:none">OnStart</code><a href="#OnStart" class="hash-link" aria-label="Direct link to OnStart" title="Direct link to OnStart">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/master/src/KnitServer.luau#L406"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code>KnitServer<!-- -->.</code><code class="green_DgR4">OnStart</code><code>(</code><code>) → </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/Promise">Promise</a></code></div><div>
+</div><div class="divider_rE5g"></div><h3 class="anchor anchorWithStickyNavbar_LWe7" id="OnStart"><code style="text-decoration:none">OnStart</code><a href="#OnStart" class="hash-link" aria-label="Direct link to OnStart" title="Direct link to OnStart">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/master/src/KnitServer.luau#L381"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code>KnitServer<!-- -->.</code><code class="green_DgR4">OnStart</code><code>(</code><code>) → </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/Promise">Promise</a></code></div><div>
 <p>
   Returns a promise that is resolved once Knit has started. This is useful
   for any code that needs to tie into Knit services but is not the script
@@ -253,28 +220,6 @@ Knit<span class="token punctuation">.</span><span class="token function">Start</
 </code></pre>
 </div></div></article></div><details><summary>Show raw api</summary><pre style="max-width:100%;white-space:pre-wrap">{
     &quot;functions&quot;: [
-        {
-            &quot;name&quot;: &quot;CreateService&quot;,
-            &quot;desc&quot;: &quot;Constructs a new service.\n\n:::caution\nServices must be created _before_ calling `Knit.Start()`.\n:::\n```lua\n-- Create a service\nlocal MyService = Knit.CreateService {\n\tName = \&quot;MyService\&quot;,\n\tClient = {},\n}\n\n-- Expose a ToAllCaps remote function to the clients\nfunction MyService.Client:ToAllCaps(player, msg)\n\treturn msg:upper()\nend\n\n-- Knit will call KnitStart after all services have been initialized\nfunction MyService:KnitStart()\n\tprint(\&quot;MyService started\&quot;)\nend\n\n-- Knit will call KnitInit when Knit is first started\nfunction MyService:KnitInit()\n\tprint(\&quot;MyService initialize\&quot;)\nend\n```&quot;,
-            &quot;params&quot;: [
-                {
-                    &quot;name&quot;: &quot;serviceDef&quot;,
-                    &quot;desc&quot;: &quot;&quot;,
-                    &quot;lua_type&quot;: &quot;ServiceDef&quot;
-                }
-            ],
-            &quot;returns&quot;: [
-                {
-                    &quot;desc&quot;: &quot;&quot;,
-                    &quot;lua_type&quot;: &quot;Service\r\n&quot;
-                }
-            ],
-            &quot;function_type&quot;: &quot;static&quot;,
-            &quot;source&quot;: {
-                &quot;line&quot;: 110,
-                &quot;path&quot;: &quot;src/KnitServer.luau&quot;
-            }
-        },
         {
             &quot;name&quot;: &quot;AddServices&quot;,
             &quot;desc&quot;: &quot;Requires all the modules that are children of the given parent. This is an easy\nway to quickly load all services that might be in a folder.\n```lua\nKnit.AddServices(somewhere.Services)\n```&quot;,
@@ -293,7 +238,7 @@ Knit<span class="token punctuation">.</span><span class="token function">Start</
             ],
             &quot;function_type&quot;: &quot;static&quot;,
             &quot;source&quot;: {
-                &quot;line&quot;: 140,
+                &quot;line&quot;: 111,
                 &quot;path&quot;: &quot;src/KnitServer.luau&quot;
             }
         },
@@ -315,7 +260,7 @@ Knit<span class="token punctuation">.</span><span class="token function">Start</
             ],
             &quot;function_type&quot;: &quot;static&quot;,
             &quot;source&quot;: {
-                &quot;line&quot;: 158,
+                &quot;line&quot;: 131,
                 &quot;path&quot;: &quot;src/KnitServer.luau&quot;
             }
         },
@@ -337,7 +282,7 @@ Knit<span class="token punctuation">.</span><span class="token function">Start</
             ],
             &quot;function_type&quot;: &quot;static&quot;,
             &quot;source&quot;: {
-                &quot;line&quot;: 176,
+                &quot;line&quot;: 151,
                 &quot;path&quot;: &quot;src/KnitServer.luau&quot;
             }
         },
@@ -353,13 +298,13 @@ Knit<span class="token punctuation">.</span><span class="token function">Start</
             ],
             &quot;function_type&quot;: &quot;static&quot;,
             &quot;source&quot;: {
-                &quot;line&quot;: 186,
+                &quot;line&quot;: 161,
                 &quot;path&quot;: &quot;src/KnitServer.luau&quot;
             }
         },
         {
             &quot;name&quot;: &quot;CreateSignal&quot;,
-            &quot;desc&quot;: &quot;Returns a marker that will transform the current key into\na RemoteSignal once the service is created. Should only\nbe called within the Client table of a service.\n\nSee [RemoteSignal](https://sleitnick.github.io/RbxUtil/api/RemoteSignal)\ndocumentation for more info.\n```lua\nlocal MyService = Knit.CreateService {\n\tName = \&quot;MyService\&quot;,\n\tClient = {\n\t\t-- Create the signal marker, which will turn into a\n\t\t-- RemoteSignal when Knit.Start() is called:\n\t\tMySignal = Knit.CreateSignal(),\n\t},\n}\n\nfunction MyService:KnitInit()\n\t-- Connect to the signal:\n\tself.Client.MySignal:Connect(function(player, ...) end)\nend\n```&quot;,
+            &quot;desc&quot;: &quot;Returns a marker that will transform the current key into\na RemoteSignal once the service is created. Should only\nbe called within the Client table of a service.\n\nSee [RemoteSignal](https://sleitnick.github.io/RbxUtil/api/RemoteSignal)\ndocumentation for more info.\n```lua\nlocal MyService = {\n\tName = \&quot;MyService\&quot;,\n\tClient = {\n\t\t-- Create the signal marker, which will turn into a\n\t\t-- RemoteSignal when Knit.Start() is called:\n\t\tMySignal = Knit.CreateSignal(),\n\t},\n}\n\nfunction MyService:KnitInit()\n\t-- Connect to the signal:\n\tself.Client.MySignal:Connect(function(player, ...) end)\nend\n```&quot;,
             &quot;params&quot;: [],
             &quot;returns&quot;: [
                 {
@@ -369,7 +314,7 @@ Knit<span class="token punctuation">.</span><span class="token function">Start</
             ],
             &quot;function_type&quot;: &quot;static&quot;,
             &quot;source&quot;: {
-                &quot;line&quot;: 216,
+                &quot;line&quot;: 191,
                 &quot;path&quot;: &quot;src/KnitServer.luau&quot;
             }
         },
@@ -385,13 +330,13 @@ Knit<span class="token punctuation">.</span><span class="token function">Start</
             ],
             &quot;function_type&quot;: &quot;static&quot;,
             &quot;source&quot;: {
-                &quot;line&quot;: 239,
+                &quot;line&quot;: 214,
                 &quot;path&quot;: &quot;src/KnitServer.luau&quot;
             }
         },
         {
             &quot;name&quot;: &quot;CreateProperty&quot;,
-            &quot;desc&quot;: &quot;Returns a marker that will transform the current key into\na RemoteProperty once the service is created. Should only\nbe called within the Client table of a service. An initial\nvalue can be passed along as well.\n\nRemoteProperties are great for replicating data to all of\nthe clients. Different data can also be set per client.\n\nSee [RemoteProperty](https://sleitnick.github.io/RbxUtil/api/RemoteProperty)\ndocumentation for more info.\n\n```lua\nlocal MyService = Knit.CreateService {\n\tName = \&quot;MyService\&quot;,\n\tClient = {\n\t\t-- Create the property marker, which will turn into a\n\t\t-- RemoteProperty when Knit.Start() is called:\n\t\tMyProperty = Knit.CreateProperty(\&quot;HelloWorld\&quot;),\n\t},\n}\n\nfunction MyService:KnitInit()\n\t-- Change the value of the property:\n\tself.Client.MyProperty:Set(\&quot;HelloWorldAgain\&quot;)\nend\n```&quot;,
+            &quot;desc&quot;: &quot;Returns a marker that will transform the current key into\na RemoteProperty once the service is created. Should only\nbe called within the Client table of a service. An initial\nvalue can be passed along as well.\n\nRemoteProperties are great for replicating data to all of\nthe clients. Different data can also be set per client.\n\nSee [RemoteProperty](https://sleitnick.github.io/RbxUtil/api/RemoteProperty)\ndocumentation for more info.\n\n```lua\nlocal MyService = {\n\tName = \&quot;MyService\&quot;,\n\tClient = {\n\t\t-- Create the property marker, which will turn into a\n\t\t-- RemoteProperty when Knit.Start() is called:\n\t\tMyProperty = Knit.CreateProperty(\&quot;HelloWorld\&quot;),\n\t},\n}\n\nfunction MyService:KnitInit()\n\t-- Change the value of the property:\n\tself.Client.MyProperty:Set(\&quot;HelloWorldAgain\&quot;)\nend\n```&quot;,
             &quot;params&quot;: [
                 {
                     &quot;name&quot;: &quot;initialValue&quot;,
@@ -407,7 +352,7 @@ Knit<span class="token punctuation">.</span><span class="token function">Start</
             ],
             &quot;function_type&quot;: &quot;static&quot;,
             &quot;source&quot;: {
-                &quot;line&quot;: 272,
+                &quot;line&quot;: 247,
                 &quot;path&quot;: &quot;src/KnitServer.luau&quot;
             }
         },
@@ -429,7 +374,7 @@ Knit<span class="token punctuation">.</span><span class="token function">Start</
             ],
             &quot;function_type&quot;: &quot;static&quot;,
             &quot;source&quot;: {
-                &quot;line&quot;: 310,
+                &quot;line&quot;: 285,
                 &quot;path&quot;: &quot;src/KnitServer.luau&quot;
             }
         },
@@ -445,7 +390,7 @@ Knit<span class="token punctuation">.</span><span class="token function">Start</
             ],
             &quot;function_type&quot;: &quot;static&quot;,
             &quot;source&quot;: {
-                &quot;line&quot;: 406,
+                &quot;line&quot;: 381,
                 &quot;path&quot;: &quot;src/KnitServer.luau&quot;
             }
         }
@@ -503,7 +448,7 @@ Knit<span class="token punctuation">.</span><span class="token function">Start</
         },
         {
             &quot;name&quot;: &quot;ServiceDef&quot;,
-            &quot;desc&quot;: &quot;Used to define a service when creating it in `CreateService`.\n\nThe middleware tables provided will be used instead of the Knit-level\nmiddleware (if any). This allows fine-tuning each service&#x27;s middleware.\nThese can also be left out or `nil` to not include middleware.&quot;,
+            &quot;desc&quot;: &quot;Used to define a service when creating it.\n\nThe middleware tables provided will be used instead of the Knit-level\nmiddleware (if any). This allows fine-tuning each service&#x27;s middleware.\nThese can also be left out or `nil` to not include middleware.&quot;,
             &quot;fields&quot;: [
                 {
                     &quot;name&quot;: &quot;Name&quot;,
@@ -606,8 +551,8 @@ Knit<span class="token punctuation">.</span><span class="token function">Start</
         &quot;line&quot;: 35,
         &quot;path&quot;: &quot;src/KnitServer.luau&quot;
     }
-}</pre></details></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#types" class="table-of-contents__link toc-highlight">Types</a><ul><li><a href="#KnitOptions" class="table-of-contents__link toc-highlight">KnitOptions</a></li><li><a href="#Middleware" class="table-of-contents__link toc-highlight">Middleware</a></li><li><a href="#ServerMiddleware" class="table-of-contents__link toc-highlight">ServerMiddleware</a></li><li><a href="#ServerMiddlewareFn" class="table-of-contents__link toc-highlight">ServerMiddlewareFn</a></li><li><a href="#Service" class="table-of-contents__link toc-highlight">Service</a></li><li><a href="#ServiceClient" class="table-of-contents__link toc-highlight">ServiceClient</a></li><li><a href="#ServiceDef" class="table-of-contents__link toc-highlight">ServiceDef</a></li></ul></li><li><a href="#properties" class="table-of-contents__link toc-highlight">Properties</a><ul><li><a href="#Util" class="table-of-contents__link toc-highlight">Util</a></li></ul></li><li><a href="#functions" class="table-of-contents__link toc-highlight">Functions</a><ul><li><a href="#AddServices" class="table-of-contents__link toc-highlight">.AddServices</a></li><li><a href="#AddServicesDeep" class="table-of-contents__link toc-highlight">.AddServicesDeep</a></li><li><a href="#CreateProperty" class="table-of-contents__link toc-highlight">.CreateProperty</a></li><li><a href="#CreateService" class="table-of-contents__link toc-highlight">.CreateService</a></li><li><a href="#CreateSignal" class="table-of-contents__link toc-highlight">.CreateSignal</a></li><li><a href="#CreateUnreliableSignal" class="table-of-contents__link toc-highlight">.CreateUnreliableSignal</a></li><li><a href="#GetService" class="table-of-contents__link toc-highlight">.GetService</a></li><li><a href="#GetServices" class="table-of-contents__link toc-highlight">.GetServices</a></li><li><a href="#OnStart" class="table-of-contents__link toc-highlight">.OnStart</a></li><li><a href="#Start" class="table-of-contents__link toc-highlight">.Start</a></li></ul></li></ul></div></div></div></div></main></div></div><footer class="footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2024 Breezy1214. Built with Moonwave and Docusaurus.</div></div></div></footer></div>
-<script src="/Knit/assets/js/runtime~main.72a8a6fc.js"></script>
-<script src="/Knit/assets/js/main.070aae6f.js"></script>
+}</pre></details></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#types" class="table-of-contents__link toc-highlight">Types</a><ul><li><a href="#KnitOptions" class="table-of-contents__link toc-highlight">KnitOptions</a></li><li><a href="#Middleware" class="table-of-contents__link toc-highlight">Middleware</a></li><li><a href="#ServerMiddleware" class="table-of-contents__link toc-highlight">ServerMiddleware</a></li><li><a href="#ServerMiddlewareFn" class="table-of-contents__link toc-highlight">ServerMiddlewareFn</a></li><li><a href="#Service" class="table-of-contents__link toc-highlight">Service</a></li><li><a href="#ServiceClient" class="table-of-contents__link toc-highlight">ServiceClient</a></li><li><a href="#ServiceDef" class="table-of-contents__link toc-highlight">ServiceDef</a></li></ul></li><li><a href="#properties" class="table-of-contents__link toc-highlight">Properties</a><ul><li><a href="#Util" class="table-of-contents__link toc-highlight">Util</a></li></ul></li><li><a href="#functions" class="table-of-contents__link toc-highlight">Functions</a><ul><li><a href="#AddServices" class="table-of-contents__link toc-highlight">.AddServices</a></li><li><a href="#AddServicesDeep" class="table-of-contents__link toc-highlight">.AddServicesDeep</a></li><li><a href="#CreateProperty" class="table-of-contents__link toc-highlight">.CreateProperty</a></li><li><a href="#CreateSignal" class="table-of-contents__link toc-highlight">.CreateSignal</a></li><li><a href="#CreateUnreliableSignal" class="table-of-contents__link toc-highlight">.CreateUnreliableSignal</a></li><li><a href="#GetService" class="table-of-contents__link toc-highlight">.GetService</a></li><li><a href="#GetServices" class="table-of-contents__link toc-highlight">.GetServices</a></li><li><a href="#OnStart" class="table-of-contents__link toc-highlight">.OnStart</a></li><li><a href="#Start" class="table-of-contents__link toc-highlight">.Start</a></li></ul></li></ul></div></div></div></div></main></div></div><footer class="footer footer--dark"><div class="container container-fluid"><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2024 Breezy1214. Built with Moonwave and Docusaurus.</div></div></div></footer></div>
+<script src="/Knit/assets/js/runtime~main.92eb349c.js"></script>
+<script src="/Knit/assets/js/main.0f84a2b3.js"></script>
 </body>
 </html>
