@@ -273,7 +273,7 @@ Having unreliable events is useful in scenarios where the data being sent is not
 To create an unreliable event, use `Knit.CreateUnreliableSignal()` within the client table of a service:
 
 ```lua
-local MyService = Knit.CreateService {
+local MyService = {
 	Name = "MyService",
 	Client = {
 		PlayEffect = Knit.CreateUnreliableSignal(),

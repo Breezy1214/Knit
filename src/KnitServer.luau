@@ -173,7 +173,7 @@ end
 	See [RemoteSignal](https://sleitnick.github.io/RbxUtil/api/RemoteSignal)
 	documentation for more info.
 	```lua
-	local MyService = Knit.CreateService {
+	local MyService = {
 		Name = "MyService",
 		Client = {
 			-- Create the signal marker, which will turn into a
@@ -229,7 +229,7 @@ end
 	documentation for more info.
 
 	```lua
-	local MyService = Knit.CreateService {
+	local MyService = {
 		Name = "MyService",
 		Client = {
 			-- Create the property marker, which will turn into a
