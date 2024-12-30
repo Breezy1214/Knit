@@ -1,0 +1,21 @@
+{
+	"name": "smurf-tycoon",
+	"globIgnorePaths": [
+		"**/.package-lock.json",
+		"**/start.server.luau",
+		"**/start.client.luau",
+		"**/ReplicatedFirst"
+	],
+	"tree": {
+		"$className": "DataModel",
+		"ReplicatedStorage": {
+			"$className": "ReplicatedStorage",
+			"Packages": {
+				"$className": "Folder",
+				"Knit": {
+                    "$path": "src"
+                }   
+			}
+		}
+	}
+}

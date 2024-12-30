@@ -17,7 +17,7 @@ For the sake of example, we will slowly develop PointsService to show how a serv
 In its simplest form, a service can be created like so:
 
 ```lua
-local PointsService = Knit.CreateService { Name = "PointsService", Client = {} }
+local PointsService = { Name = "PointsService", Client = {} }
 
 return PointsService
 ```
@@ -100,7 +100,7 @@ Another service could then listen for the changes on that event:
 
 ```lua
 function SomeOtherService:KnitStart()
-	local PointsService = Knit.GetService("PointsService")
+	local PointsService = require("PointsService")
 	PointsService.PointsChanged:Connect(function(player, points)
 		print("Points changed for " .. player.Name .. ":", points)
 	end)
@@ -172,7 +172,7 @@ end)
 We can use remote signals to fire events from the server to the clients. Continuing with the previous PointsService example, let's create a signal that fires when a client's points change. We can use `Knit.CreateSignal()` to indicate we want a signal created for the service.
 
 ```lua
-local PointsService = Knit.CreateService {
+local PointsService = {
 	Name = "PointsService",
 	Client = {
 		PointsChanged = Knit.CreateSignal(), -- Create the signal
@@ -222,7 +222,7 @@ We will create another client-exposed signal called `GiveMePoints` which will ra
 
 Let's create the signal on the PointsService:
 ```lua
-local PointsService = Knit.CreateService {
+local PointsService = {
 	Name = "PointsService",
 	Client = {
 		PointsChanged = Knit.CreateSignal(),
@@ -337,7 +337,7 @@ At the end of this tutorial, we should have a PointsService that looks something
 local Knit = require(game:GetService("ReplicatedStorage").Packages.Knit)
 local Signal = require(Knit.Util.Signal)
 
-local PointsService = Knit.CreateService {
+local PointsService = {
 	Name = "PointsService",
 	-- Define some properties:
 	PointsPerPlayer = {},

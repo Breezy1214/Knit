@@ -78,36 +78,7 @@ local function DoesServiceExist(serviceName: string): boolean
 	return service ~= nil
 end
 
---[=[
-	Constructs a new service.
-
-	:::caution
-	Services must be created _before_ calling `Knit.Start()`.
-	:::
-	```lua
-	-- Create a service
-	local MyService = Knit.CreateService {
-		Name = "MyService",
-		Client = {},
-	}
-
-	-- Expose a ToAllCaps remote function to the clients
-	function MyService.Client:ToAllCaps(player, msg)
-		return msg:upper()
-	end
-
-	-- Knit will call KnitStart after all services have been initialized
-	function MyService:KnitStart()
-		print("MyService started")
-	end
-
-	-- Knit will call KnitInit when Knit is first started
-	function MyService:KnitInit()
-		print("MyService initialize")
-	end
-	```
-]=]
-function KnitServer.CreateService(serviceDef: ServiceDef): Service
+local function createService(serviceDef: ServiceDef): Service
 	assert(type(serviceDef) == "table", `Service must be a table; got {type(serviceDef)}`)
 	assert(type(serviceDef.Name) == "string", `Service.Name must be a string; got {type(serviceDef.Name)}`)
 	assert(#serviceDef.Name > 0, "Service.Name must be a non-empty string")
@@ -146,7 +117,9 @@ function KnitServer.AddServices(parent: Instance): { Service }
 			continue
 		end
 
-		table.insert(addedServices, require(v))
+		local serviceDef: ServiceDef = require(v)
+		createService(serviceDef)
+		table.insert(addedServices, serviceDef)
 	end
 
 	return addedServices
@@ -164,7 +137,9 @@ function KnitServer.AddServicesDeep(parent: Instance): { Service }
 			continue
 		end
 
-		table.insert(addedServices, require(v))
+		local serviceDef: ServiceDef = require(v)
+		createService(serviceDef)
+		table.insert(addedServices, serviceDef)
 	end
 
 	return addedServices
