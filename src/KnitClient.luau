@@ -172,7 +172,7 @@ end
 
 	```lua
 	-- Server-side service creation:
-	local MyService = Knit.CreateService {
+	local MyService = {
 		Name = "MyService",
 		Client = {
 			MySignal = Knit.CreateSignal(),

@@ -30,7 +30,7 @@ end
 Knit.Start():catch(warn)
 ```
 
-Alternatively, we can use `Knit.AddServices` or `Knit.AddServicesDeep` to load all of the services without writing a loop. It scans and loads all ModuleScripts found and passes them to `Knit.CreateService`:
+Alternatively, we can use `Knit.AddServices` or `Knit.AddServicesDeep` to load all of the services without writing a loop. It scans and loads all ModuleScripts found:
 
 ```lua
 local Knit = require(game:GetService("ReplicatedStorage").Packages.Knit)

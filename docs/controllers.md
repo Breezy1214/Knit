@@ -17,7 +17,7 @@ For the sake of example, we will develop a CameraController.
 In its simplest form, a controller can be created like so:
 
 ```lua
-local CameraController = Knit.CreateController { Name = "CameraController" }
+local CameraController = { Name = "CameraController" }
 
 return CameraController
 ```

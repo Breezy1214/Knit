@@ -85,7 +85,7 @@ Reference Knit, create a service, and return the service.
 	"body": [
 		"local Knit = require(ReplicatedStorage.Packages.Knit)",
 		"",
-		"local ${0:$TM_FILENAME_BASE} = Knit.CreateService {",
+		"local ${0:$TM_FILENAME_BASE} = {",
 		"\tName = \"${0:$TM_FILENAME_BASE}\",",
 		"\tClient = {},",
 		"}",
@@ -115,7 +115,7 @@ Reference Knit, create a service, and return the service.
 ```lua
 local Knit = require(ReplicatedStorage.Packages.Knit)
 
-local MyService = Knit.CreateService {
+local MyService = {
 	Name = "MyService",
 	Client = {},
 }
@@ -319,7 +319,7 @@ All the above snippets together.
 		"body": [
 			"local Knit = require(ReplicatedStorage.Packages.Knit)",
 			"",
-			"local ${0:$TM_FILENAME_BASE} = Knit.CreateService {",
+			"local ${0:$TM_FILENAME_BASE} = {",
 			"\tName = \"${0:$TM_FILENAME_BASE}\",",
 			"\tClient = {},",
 			"}",

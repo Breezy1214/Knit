@@ -33,7 +33,7 @@ export type ServerMiddleware = { ServerMiddlewareFn }
 	.Middleware Middleware?
 	.[any] any
 	@within KnitServer
-	Used to define a service when creating it in `CreateService`.
+	Used to define a service when creating it.
 
 	The middleware tables provided will be used instead of the Knit-level
 	middleware (if any). This allows fine-tuning each service's middleware.
@@ -110,7 +110,7 @@ export type PerServiceMiddleware = { [string]: MiddlewareServer }
 	.Name string
 	.[any] any
 	@within KnitClient
-	Used to define a controller when creating it in `CreateController`.
+	Used to define a controller when creating it.
 ]=]
 export type ControllerDef = {
 	Name: string,

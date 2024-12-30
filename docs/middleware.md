@@ -68,7 +68,7 @@ Knit.Start({ Middleware = { Inbound = { DoubleNumbers } } })
 Middleware can also be targeted per-service, which will override the global level middleware for the given service.
 ```lua
 -- Server-side:
-local MyService = Knit.CreateService {
+local MyService = {
 	Name = "MyService",
 	Client = {},
 	Middleware = {

@@ -32,7 +32,7 @@ Below is an example of the Signal class being used in a service:
 ```lua
 local Signal = require(Knit.Util.Signal)
 
-local MyService = Knit.CreateService {
+local MyService = {
 	Name = "MyService",
 	SomeSignal = Signal.new(),
 }

@@ -1,6 +1,6 @@
 local Types = require(script.Parent.Types)
 
-export type Middleware = Types.MiddlewareServer
+export type MiddlewareServer = Types.MiddlewareServer
 export type ServerMiddlewareFn = Types.ServerMiddlewareFn
 export type ServerMiddleware = Types.ServerMiddleware
 export type ServiceDef = Types.ServiceDef
@@ -68,9 +68,9 @@ local Comm = require(KnitServer.Util.Comm)
 local ServerComm = Comm.ServerComm
 
 local services: { [string]: Service } = {}
-local started = false
-local startedComplete = false
-local onStartedComplete = Instance.new("BindableEvent")
+local started: boolean = false
+local startedComplete: boolean = false
+local onStartedComplete: BindableEvent = Instance.new("BindableEvent")
 
 local function DoesServiceExist(serviceName: string): boolean
 	local service: Service? = services[serviceName]
@@ -118,8 +118,8 @@ function KnitServer.AddServices(parent: Instance): { Service }
 		end
 
 		local serviceDef: ServiceDef = require(v)
-		createService(serviceDef)
-		table.insert(addedServices, serviceDef)
+		local service: Service = createService(serviceDef)
+		table.insert(addedServices, service)
 	end
 
 	return addedServices
@@ -138,8 +138,8 @@ function KnitServer.AddServicesDeep(parent: Instance): { Service }
 		end
 
 		local serviceDef: ServiceDef = require(v)
-		createService(serviceDef)
-		table.insert(addedServices, serviceDef)
+		local service: Service = createService(serviceDef)
+		table.insert(addedServices, service)
 	end
 
 	return addedServices

@@ -48,7 +48,7 @@ A service is simply a structure that _serves_ some specific purpose. For instanc
 local Knit = require(game:GetService("ReplicatedStorage").Packages.Knit)
 
 -- Create the service:
-local MoneyService = Knit.CreateService {
+local MoneyService =  {
 	Name = "MoneyService",
 }
 
