@@ -1,18 +1,8 @@
-[![Release](https://github.com/Sleitnick/Knit/actions/workflows/release.yaml/badge.svg)](https://github.com/Sleitnick/Knit/actions/workflows/release.yaml)
-[![CI](https://github.com/Sleitnick/Knit/actions/workflows/ci.yaml/badge.svg)](https://github.com/Sleitnick/Knit/actions/workflows/ci.yaml)
-[![Docs](https://github.com/Sleitnick/Knit/actions/workflows/docs.yaml/badge.svg)](https://github.com/Sleitnick/Knit/actions/workflows/docs.yaml)
-
-## :warning: No Longer Maintained :warning:
-
-Knit has been archived and will no longer receive updates.
-
-Please [read here](/ARCHIVAL.md) for more information.
-
 # Knit
 
 Knit is a lightweight framework for Roblox that simplifies communication between core parts of your game and seamlessly bridges the gap between the server and the client.
 
-Read the [documentation](https://sleitnick.github.io/Knit/) for more info.
+Read the [documentation](https://breezy1214.github.io/Knit/) for more info.
 
 ## Install
 
