@@ -108,12 +108,16 @@ end
 	Knit.AddServices(somewhere.Services)
 	```
 ]=]
-function KnitServer.AddServices(parent: Instance): { Service }
+function KnitServer.AddServices(parent: Instance, predicate: ((ModuleScript) -> boolean)?): { Service }
 	assert(not started, `Services cannot be added after calling "Knit.Start()"`)
 
 	local addedServices = {}
 	for _, v in parent:GetChildren() do
 		if not v:IsA("ModuleScript") then
+			continue
+		end
+
+		if predicate and not predicate(v) then
 			continue
 		end
 
@@ -131,12 +135,12 @@ end
 	which services are added. The predicate function should return a
 	boolean value based on the service name.
 	```lua
-	Knit.AddServicesDeep(somewhere.Services, function(serviceName)
-		return string.find(serviceName, "Service")
+	Knit.AddServicesDeep(somewhere.Services, function(service)
+		return string.find(service.Name, "Service")
 	end)
 	```
 ]=]
-function KnitServer.AddServicesDeep(parent: Instance, predicate: ((string) -> boolean)?): { Service }
+function KnitServer.AddServicesDeep(parent: Instance, predicate: ((ModuleScript) -> boolean)?): { Service }
 	assert(not started, `Services cannot be added after calling "Knit.Start()"`)
 
 	local addedServices = {}
@@ -145,7 +149,7 @@ function KnitServer.AddServicesDeep(parent: Instance, predicate: ((string) -> bo
 			continue
 		end
 
-		if predicate and not predicate(v.Name) then
+		if predicate and not predicate(v) then
 			continue
 		end
 
