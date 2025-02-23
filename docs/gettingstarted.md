@@ -15,10 +15,10 @@ Knit can be used via two workflows: Roblox Studio and externally with Rojo and W
 
 Installing Knit is very simple. Just drop the module into ReplicatedStorage. Knit can also be used within a Rojo project.
 
-**Roblox Studio workflow:**
+<!-- **Roblox Studio workflow:**
 
 - Get [Knit](https://www.roblox.com/library/5530714855/Knit) from the Roblox library.
-- Place Knit directly within ReplicatedStorage.
+- Place Knit directly within ReplicatedStorage. -->
 
 **Rojo/Wally workflow:**
 
