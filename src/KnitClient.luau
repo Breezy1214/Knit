@@ -106,12 +106,16 @@ end
 	Knit.AddControllers(somewhere.Controllers)
 	```
 ]=]
-function KnitClient.AddControllers(parent: Instance): { Controller }
+function KnitClient.AddControllers(parent: Instance, predicate: (ModuleScript) -> boolean): { Controller }
 	assert(not started, `Controllers cannot be added after calling "Knit.Start()"`)
 
 	local addedControllers = {}
 	for _, v in parent:GetChildren() do
 		if not v:IsA("ModuleScript") then
+			continue
+		end
+
+		if predicate and not predicate(v) then
 			continue
 		end
 
@@ -126,12 +130,16 @@ end
 --[=[
 	Requires all the modules that are descendants of the given parent.
 ]=]
-function KnitClient.AddControllersDeep(parent: Instance): { Controller }
+function KnitClient.AddControllersDeep(parent: Instance, predicate: (ModuleScript) -> boolean): { Controller }
 	assert(not started, `Controllers cannot be added after calling "Knit.Start()"`)
 
 	local addedControllers = {}
 	for _, v in parent:GetDescendants() do
 		if not v:IsA("ModuleScript") then
+			continue
+		end
+
+		if predicate and not predicate(v) then
 			continue
 		end
 
