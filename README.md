@@ -136,9 +136,18 @@ Knit.AddServices(game.ServerScriptService.Services, function(moduleScript)
 end)
 
 -- 🔍 Load from nested folders with AddServicesDeep
-Knit.AddServicesDeep(game.ServerScriptService, function(moduleScript)
-    return moduleScript.Name:match("Service$") and not moduleScript.Name:match("Test")
+Knit.AddServicesDeep(game.ServerScriptService, function(moduleScript, parent, depth, path)
+    return moduleScript.Name:match("Service$")
+        and not moduleScript.Name:match("Test")
+        and depth <= 3
+        and not path:match("/Legacy/")
 end)
+
+-- Or pass only deep-scan options (no predicate)
+Knit.AddServicesDeep(game.ServerScriptService, {
+    MaxDepth = 4,
+    IgnoreFolderPatterns = {"^Tests$", "^Dev$"},
+})
 
 Knit.Start():catch(warn)
 ```
@@ -232,6 +241,7 @@ Control when your services and controllers initialize and start:
 ```lua
 local MyService = {
     Name = "MyService",
+    DependsOn = {"OtherService"}, -- Optional explicit startup dependency ordering
 }
 
 -- Called when Knit.Start() begins (before other services start)
@@ -246,6 +256,21 @@ function MyService:KnitStart()
     -- Safe to reference other services here
     local OtherService = Knit.GetService("OtherService")
 end
+
+-- Optional: make startup wait for KnitStart handlers and reject on errors
+Knit.Start({
+    DeterministicStart = true,
+}):catch(warn)
+
+-- If one or more KnitStart handlers fail in deterministic mode,
+-- Knit.Start rejects with an aggregate error table:
+-- {
+--   Message = "KnitStart failed for N service(s)",
+--   Errors = {
+--     { Name = "ServiceName", Error = <traceback or rejection value> },
+--     ...
+--   }
+-- }
 ```
 
 ### Middleware
@@ -335,12 +360,15 @@ Knit.AddServices(game.ServerScriptService.Services, function(moduleScript)
 end)
 
 -- 🔥 Even better - deep loading with filters
-Knit.AddServicesDeep(game.ServerScriptService, function(moduleScript)
-    -- Load services from any nested folder, but skip test files
-    return moduleScript.Name:match("Service$") and 
-           not moduleScript.Name:match("Test") and
-           not moduleScript.Parent.Name:match("Tests")
-end)
+Knit.AddServicesDeep(game.ServerScriptService, function(moduleScript, parent, depth, path)
+    -- Load services from nested folders, skip test/dev directories
+    return moduleScript.Name:match("Service$")
+        and not path:match("/Tests/")
+        and not path:match("/Dev/")
+        and depth <= 4
+end, {
+    IgnoreFolderPatterns = {"^Tests$", "^Dev$"},
+})
 ```
 
 ## 🤝 Contributing

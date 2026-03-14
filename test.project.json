@@ -1,5 +1,5 @@
 {
-	"name": "smurf-tycoon",
+	"name": "Knit-Tests",
 	"globIgnorePaths": [
 		"**/.package-lock.json",
 		"**/start.server.luau",

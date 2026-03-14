@@ -8,11 +8,15 @@ export type ControllerDef = Types.ControllerDef
 export type Controller = Types.Controller
 export type ClientService = Types.ClientService
 export type KnitClientOptions = Types.KnitClientOptions
+export type DeepPredicateFn = Types.DeepPredicateFn
+export type DeepSearchOptions = Types.DeepSearchOptions
 
 local defaultOptions: KnitClientOptions = {
 	ServicePromises = true,
 	Middleware = nil,
 	PerServiceMiddleware = {},
+	DeterministicStart = false,
+	OnStartError = nil,
 }
 
 local selectedOptions = nil
@@ -45,8 +49,10 @@ KnitClient.Util = (script.Parent :: Instance).Parent
 local Promise = require(KnitClient.Util.Promise)
 local Comm = require(KnitClient.Util.Comm)
 local ClientComm = Comm.ClientComm
+local KnitShared = require(script.Parent.KnitShared)
 
 local controllers: { [string]: Controller } = {}
+local controllerOrder: { Controller } = {}
 local services: { [string]: ClientService } = {}
 local servicesFolder = nil
 
@@ -95,6 +101,7 @@ local function createController(controllerDef: ControllerDef): Controller
 
 	local controller = controllerDef :: Controller
 	controllers[controller.Name] = controller
+	table.insert(controllerOrder, controller)
 
 	return controller
 end
@@ -106,7 +113,7 @@ end
 	Knit.AddControllers(somewhere.Controllers)
 	```
 ]=]
-function KnitClient.AddControllers(parent: Instance, predicate: (ModuleScript) -> boolean): { Controller }
+function KnitClient.AddControllers(parent: Instance, predicate: ((ModuleScript) -> boolean)?): { Controller }
 	assert(not started, `Controllers cannot be added after calling "Knit.Start()"`)
 
 	local addedControllers = {}
@@ -129,24 +136,58 @@ end
 
 --[=[
 	Requires all the modules that are descendants of the given parent.
+	Optionally, a predicate function can be passed in order to filter
+	which controllers are added.
+
+	The predicate receives `(moduleScript, parent, depth, path)` and
+	should return a boolean. Existing predicate functions that only
+	accept `moduleScript` continue to work.
+
+	You can also pass options to control scanning behavior:
+	- `MaxDepth` limits recursion depth (starting at `1` for children)
+	- `IgnoreFolderPatterns` skips traversing folders that match any
+	  Lua string pattern in the array
 ]=]
-function KnitClient.AddControllersDeep(parent: Instance, predicate: (ModuleScript) -> boolean): { Controller }
+function KnitClient.AddControllersDeep(
+	parent: Instance,
+	predicateOrOptions: (
+		((ModuleScript, Instance, number, string) -> boolean) | DeepSearchOptions | nil
+	)?,
+	options: DeepSearchOptions?
+): { Controller }
 	assert(not started, `Controllers cannot be added after calling "Knit.Start()"`)
 
+	local predicate, deepSearchOptions = KnitShared.parseDeepSearchArgs(predicateOrOptions, options, "AddControllersDeep")
+	local maxDepth = if deepSearchOptions and deepSearchOptions.MaxDepth then deepSearchOptions.MaxDepth else math.huge
+	local ignoreFolderPatterns = if deepSearchOptions and deepSearchOptions.IgnoreFolderPatterns
+		then deepSearchOptions.IgnoreFolderPatterns
+		else {}
+
 	local addedControllers = {}
-	for _, v in parent:GetDescendants() do
-		if not v:IsA("ModuleScript") then
-			continue
+
+	local function walk(node: Instance, depth: number, path: string)
+		if depth > maxDepth then
+			return
 		end
 
-		if predicate and not predicate(v) then
-			continue
-		end
+		for _, child in node:GetChildren() do
+			local childPath = if path == "" then child.Name else `{path}/{child.Name}`
 
-		local controllerDef: ControllerDef = require(v)
-		local controller: Controller = createController(controllerDef)
-		table.insert(addedControllers, controller)
+			if child:IsA("ModuleScript") then
+				if predicate and not predicate(child, node, depth, childPath) then
+					continue
+				end
+
+				local controllerDef: ControllerDef = require(child)
+				local controller: Controller = createController(controllerDef)
+				table.insert(addedControllers, controller)
+			elseif not KnitShared.shouldIgnoreFolder(child, ignoreFolderPatterns) then
+				walk(child, depth + 1, childPath)
+			end
+		end
 	end
+
+	walk(parent, 1, "")
 
 	return addedControllers
 end
@@ -264,6 +305,7 @@ function KnitClient.Start(options: KnitClientOptions?)
 	started = true
 
 	table.freeze(controllers)
+	table.freeze(controllerOrder)
 
 	if options == nil then
 		selectedOptions = defaultOptions
@@ -280,42 +322,38 @@ function KnitClient.Start(options: KnitClientOptions?)
 		selectedOptions.PerServiceMiddleware = {}
 	end
 
-	return Promise.new(function(resolve)
-		-- Init:
-		local promisesStartControllers = {}
+	KnitShared.validateStartOptions(selectedOptions)
 
-		for _, controller in controllers do
-			if type(controller.KnitInit) == "function" then
-				table.insert(
-					promisesStartControllers,
-					Promise.new(function(r)
-						debug.setmemorycategory(controller.Name)
-						controller:KnitInit()
-						r()
-					end)
-				)
+	KnitShared.validateMiddleware(selectedOptions.Middleware, "KnitOptions.Middleware")
+
+	for serviceName, middleware in selectedOptions.PerServiceMiddleware do
+		assert(
+			type(serviceName) == "string",
+			`KnitOptions.PerServiceMiddleware keys must be strings; got {type(serviceName)}`
+		)
+		KnitShared.validateMiddleware(middleware, `KnitOptions.PerServiceMiddleware["{serviceName}"]`)
+	end
+
+	local orderedControllers = KnitShared.resolveDependencyOrder(controllerOrder, controllers, "controller")
+
+	return KnitShared.runKnitInitSequential(orderedControllers)
+		:andThen(function()
+			-- Start:
+			if selectedOptions.DeterministicStart then
+				return KnitShared.runKnitStartTracked(orderedControllers, "controller", selectedOptions.OnStartError)
+			else
+				KnitShared.runKnitStartFireAndForget(orderedControllers, selectedOptions.OnStartError)
+				return Promise.resolve()
 			end
-		end
-
-		resolve(Promise.all(promisesStartControllers))
-	end):andThen(function()
-		-- Start:
-		for _, controller in controllers do
-			if type(controller.KnitStart) == "function" then
-				task.spawn(function()
-					debug.setmemorycategory(controller.Name)
-					controller:KnitStart()
-				end)
-			end
-		end
-
-		startedComplete = true
-		onStartedComplete:Fire()
-
-		task.defer(function()
-			onStartedComplete:Destroy()
 		end)
-	end)
+		:andThen(function()
+			startedComplete = true
+			onStartedComplete:Fire()
+
+			task.defer(function()
+				onStartedComplete:Destroy()
+			end)
+		end)
 end
 
 --[=[

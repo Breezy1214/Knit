@@ -43,6 +43,7 @@ export type ServiceDef = {
 	Name: string,
 	Client: { [any]: any }?,
 	Middleware: MiddlewareServer?,
+	DependsOn: { string }?,
 	[any]: any,
 }
 
@@ -82,6 +83,26 @@ export type ServiceClient = {
 ]=]
 export type KnitServerOptions = {
 	Middleware: MiddlewareServer?,
+	DeterministicStart: boolean?,
+	OnStartError: ((name: string, err: any) -> ())?,
+}
+
+--[=[
+	@type DeepPredicateFn (moduleScript: ModuleScript, parent: Instance, depth: number, path: string) -> boolean
+	@within KnitServer
+	Predicate function used by deep discovery helpers.
+]=]
+export type DeepPredicateFn = (moduleScript: ModuleScript, parent: Instance, depth: number, path: string) -> boolean
+
+--[=[
+	@interface DeepSearchOptions
+	.MaxDepth number?
+	.IgnoreFolderPatterns {string}?
+	@within KnitServer
+]=]
+export type DeepSearchOptions = {
+	MaxDepth: number?,
+	IgnoreFolderPatterns: { string }?,
 }
 
 --[=[
@@ -103,7 +124,7 @@ export type ClientMiddleware = { ClientMiddlewareFn }
 	@type PerServiceMiddleware {[string]: Middleware}
 	@within KnitClient
 ]=]
-export type PerServiceMiddleware = { [string]: MiddlewareServer }
+export type PerServiceMiddleware = { [string]: MiddlewareClient }
 
 --[=[
 	@interface ControllerDef
@@ -114,6 +135,7 @@ export type PerServiceMiddleware = { [string]: MiddlewareServer }
 ]=]
 export type ControllerDef = {
 	Name: string,
+	DependsOn: { string }?,
 	[any]: any,
 }
 
@@ -141,8 +163,10 @@ export type Controller = {
 ]=]
 export type KnitClientOptions = {
 	ServicePromises: boolean,
-	Middleware: MiddlewareServer?,
+	Middleware: MiddlewareClient?,
 	PerServiceMiddleware: PerServiceMiddleware?,
+	DeterministicStart: boolean?,
+	OnStartError: ((name: string, err: any) -> ())?,
 }
 
 --[=[

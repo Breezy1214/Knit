@@ -7,9 +7,13 @@ export type ServiceDef = Types.ServiceDef
 export type Service = Types.Service
 export type ServiceClient = Types.ServiceClient
 export type KnitServerOptions = Types.KnitServerOptions
+export type DeepPredicateFn = Types.DeepPredicateFn
+export type DeepSearchOptions = Types.DeepSearchOptions
 
 local defaultOptions: KnitServerOptions = {
 	Middleware = nil,
+	DeterministicStart = false,
+	OnStartError = nil,
 }
 
 local selectedOptions = nil
@@ -66,8 +70,10 @@ knitRepServiceFolder.Name = "Services"
 local Promise = require(KnitServer.Util.Promise)
 local Comm = require(KnitServer.Util.Comm)
 local ServerComm = Comm.ServerComm
+local KnitShared = require(script.Parent.KnitShared)
 
 local services: { [string]: Service } = {}
+local serviceOrder: { Service } = {}
 local started: boolean = false
 local startedComplete: boolean = false
 local onStartedComplete: BindableEvent = Instance.new("BindableEvent")
@@ -97,6 +103,7 @@ local function createService(serviceDef: ServiceDef): Service
 	end
 
 	services[service.Name] = service
+	table.insert(serviceOrder, service)
 
 	return service
 end
@@ -132,31 +139,68 @@ end
 --[=[
 	Requires all the modules that are descendants of the given parent.
 	Optionally, a predicate function can be passed in order to filter
-	which services are added. The predicate function should return a
-	boolean value based on the service name.
+	which services are added.
+
+	The predicate receives `(moduleScript, parent, depth, path)` and
+	should return a boolean. Existing predicate functions that only
+	accept `moduleScript` continue to work.
+
+	You can also pass options to control scanning behavior:
+	- `MaxDepth` limits recursion depth (starting at `1` for children)
+	- `IgnoreFolderPatterns` skips traversing folders that match any
+	  Lua string pattern in the array
+
 	```lua
 	Knit.AddServicesDeep(somewhere.Services, function(service)
 		return string.find(service.Name, "Service")
 	end)
+
+	Knit.AddServicesDeep(somewhere.Services, {
+		MaxDepth = 3,
+		IgnoreFolderPatterns = {"^Tests$", "^Dev"},
+	})
 	```
 ]=]
-function KnitServer.AddServicesDeep(parent: Instance, predicate: ((ModuleScript) -> boolean)?): { Service }
+function KnitServer.AddServicesDeep(
+	parent: Instance,
+	predicateOrOptions: (
+		((ModuleScript, Instance, number, string) -> boolean) | DeepSearchOptions | nil
+	)?,
+	options: DeepSearchOptions?
+): { Service }
 	assert(not started, `Services cannot be added after calling "Knit.Start()"`)
 
+	local predicate, deepSearchOptions = KnitShared.parseDeepSearchArgs(predicateOrOptions, options, "AddServicesDeep")
+	local maxDepth = if deepSearchOptions and deepSearchOptions.MaxDepth then deepSearchOptions.MaxDepth else math.huge
+	local ignoreFolderPatterns = if deepSearchOptions and deepSearchOptions.IgnoreFolderPatterns
+		then deepSearchOptions.IgnoreFolderPatterns
+		else {}
+
 	local addedServices = {}
-	for _, v in parent:GetDescendants() do
-		if not v:IsA("ModuleScript") then
-			continue
+
+	local function walk(node: Instance, depth: number, path: string)
+		if depth > maxDepth then
+			return
 		end
 
-		if predicate and not predicate(v) then
-			continue
-		end
+		for _, child in node:GetChildren() do
+			local childPath = if path == "" then child.Name else `{path}/{child.Name}`
 
-		local serviceDef: ServiceDef = require(v)
-		local service: Service = createService(serviceDef)
-		table.insert(addedServices, service)
+			if child:IsA("ModuleScript") then
+				if predicate and not predicate(child, node, depth, childPath) then
+					continue
+				end
+
+				local serviceDef: ServiceDef = require(child)
+				local service: Service = createService(serviceDef)
+				table.insert(addedServices, service)
+			elseif not KnitShared.shouldIgnoreFolder(child, ignoreFolderPatterns) then
+				walk(child, depth + 1, childPath)
+			end
+		end
 	end
+
+	walk(parent, 1, "")
 
 	return addedServices
 end
@@ -281,7 +325,7 @@ end
 		print("Knit started!")
 	end):catch(warn)
 	```
-	
+
 	Example of Knit started with options:
 	```lua
 	Knit.Start({
@@ -306,6 +350,7 @@ function KnitServer.Start(options: KnitServerOptions?)
 	started = true
 
 	table.freeze(services)
+	table.freeze(serviceOrder)
 
 	if options == nil then
 		selectedOptions = defaultOptions
@@ -319,11 +364,18 @@ function KnitServer.Start(options: KnitServerOptions?)
 		end
 	end
 
+	KnitShared.validateStartOptions(selectedOptions)
+	KnitShared.validateMiddleware(selectedOptions.Middleware, "KnitOptions.Middleware")
+
+	local orderedServices = KnitShared.resolveDependencyOrder(serviceOrder, services, "service")
+
 	return Promise.new(function(resolve)
 		local knitMiddleware = if selectedOptions.Middleware ~= nil then selectedOptions.Middleware else {}
 
 		-- Bind remotes:
-		for _, service in services do
+		for _, service in orderedServices do
+			KnitShared.validateMiddleware(service.Middleware, `Service "{service.Name}" middleware`)
+
 			local middleware = if service.Middleware ~= nil then service.Middleware else {}
 			local inbound = if middleware.Inbound ~= nil then middleware.Inbound else knitMiddleware.Inbound
 			local outbound = if middleware.Outbound ~= nil then middleware.Outbound else knitMiddleware.Outbound
@@ -343,43 +395,28 @@ function KnitServer.Start(options: KnitServerOptions?)
 			end
 		end
 
-		-- Init:
-		local promisesInitServices = {}
-		for _, service in services do
-			if type(service.KnitInit) == "function" then
-				table.insert(
-					promisesInitServices,
-					Promise.new(function(r)
-						debug.setmemorycategory(service.Name)
-						service:KnitInit()
-						r()
-					end)
-				)
-			end
-		end
-
-		resolve(Promise.all(promisesInitServices))
-	end):andThen(function()
-		-- Start:
-		for _, service in services do
-			if type(service.KnitStart) == "function" then
-				task.spawn(function()
-					debug.setmemorycategory(service.Name)
-					service:KnitStart()
-				end)
-			end
-		end
-
-		startedComplete = true
-		onStartedComplete:Fire()
-
-		task.defer(function()
-			onStartedComplete:Destroy()
-		end)
-
-		-- Expose service remotes to everyone:
-		knitRepServiceFolder.Parent = script.Parent
+		resolve(KnitShared.runKnitInitSequential(orderedServices))
 	end)
+		:andThen(function()
+			-- Start:
+			if selectedOptions.DeterministicStart then
+				return KnitShared.runKnitStartTracked(orderedServices, "service", selectedOptions.OnStartError)
+			else
+				KnitShared.runKnitStartFireAndForget(orderedServices, selectedOptions.OnStartError)
+				return Promise.resolve()
+			end
+		end)
+		:andThen(function()
+			startedComplete = true
+			onStartedComplete:Fire()
+
+			task.defer(function()
+				onStartedComplete:Destroy()
+			end)
+
+			-- Expose service remotes to everyone:
+			knitRepServiceFolder.Parent = script.Parent
+		end)
 end
 
 --[=[

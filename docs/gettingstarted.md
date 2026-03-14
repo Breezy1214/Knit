@@ -125,4 +125,24 @@ local money = MoneyService:GetMoney()
 
 Under the hood, Knit is creating a RemoteFunction bound to the service's GetMoney method. Knit keeps RemoteFunctions and RemoteEvents out of the way so that developers can focus on writing code and not building communication infrastructure.
 
+## Deep Auto-Loading Controls
+
+When using `Knit.AddServicesDeep` or `Knit.AddControllersDeep`, you can provide a predicate with richer context and optional deep search controls:
+
+```lua
+Knit.AddServicesDeep(game.ServerScriptService.Services, function(moduleScript, parent, depth, path)
+  return moduleScript.Name:match("Service$")
+    and depth <= 3
+    and not path:match("/Tests/")
+end, {
+  MaxDepth = 4,
+  IgnoreFolderPatterns = {"^Tests$", "^Dev$"},
+})
+```
+
+- `depth` starts at `1` for direct children of the root instance.
+- `path` is the module path relative to the root instance, separated by `/`.
+- You can pass only options by omitting the predicate:
+  `Knit.AddServicesDeep(root, { MaxDepth = 2 })`
+
 Check out the [Services](services.md) documentation for more info on services.

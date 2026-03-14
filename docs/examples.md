@@ -41,6 +41,15 @@ Knit.AddServices(script.Parent.Services)
 -- Load all services (the Deep version scans all descendants of the passed instance):
 Knit.AddServicesDeep(script.Parent.OtherServices)
 
+-- Load deep with controls:
+Knit.AddServicesDeep(script.Parent.OtherServices, function(moduleScript, parent, depth, path)
+  return moduleScript.Name:match("Service$")
+    and depth <= 3
+    and not path:match("/Tests/")
+end, {
+  IgnoreFolderPatterns = {"^Tests$", "^Dev$"},
+})
+
 Knit.Start():catch(warn)
 ```
 

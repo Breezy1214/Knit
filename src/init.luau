@@ -9,6 +9,8 @@ export type ServiceDef = Types.ServiceDef
 export type Service = Types.Service
 export type ServiceClient = Types.ServiceClient
 export type KnitServerOptions = Types.KnitServerOptions
+export type DeepPredicateFn = Types.DeepPredicateFn
+export type DeepSearchOptions = Types.DeepSearchOptions
 
 export type ClientMiddlewareFn = Types.ClientMiddlewareFn
 export type ClientMiddleware = Types.ClientMiddleware
