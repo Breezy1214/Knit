@@ -1,17 +1,19 @@
 # Knit
 
-A modern, lightweight framework for Roblox that simplifies communication between core parts of your game and seamlessly bridges the gap between server and client with **full type safety** and **IntelliSense support**.
+A lightweight framework for Roblox that simplifies communication between core parts of your game and bridges the gap between server and client with full type safety and IntelliSense support.
 
-## ✨ Features
+## Features
 
-- 🔒 **Fully Typed** - Complete type safety for Luau
-- 🧠 **IntelliSense Ready** - Rich autocomplete
-- 🚀 **Zero Boilerplate** - No more `CreateService()` or `CreateController()` calls
-- 🌉 **Seamless Networking** - Automatic RemoteFunction/RemoteEvent generation
-- ⚡ **Promise-based** - Built-in Promise support for async operations
-- 🛡️ **Middleware Support** - Extensible request/response pipeline
+- **Fully Typed** -- Complete type safety for Luau with exported types
+- **IntelliSense Ready** -- Rich autocomplete in VS Code and Studio
+- **Zero Boilerplate** -- Services and controllers are plain tables; no `CreateService()` or `CreateController()` calls required
+- **Automatic Networking** -- RemoteFunction and RemoteEvent instances are generated from declarative definitions
+- **Promise-Based** -- Built-in Promise support for asynchronous operations
+- **Middleware** -- Extensible inbound/outbound request pipeline at global and per-service levels
+- **Dependency Ordering** -- Optional `DependsOn` field for explicit startup sequencing
+- **Deterministic Start** -- Optional mode that awaits all `KnitStart` handlers and surfaces errors
 
-## 📦 Installation
+## Installation
 
 ### Wally (Recommended)
 
@@ -22,23 +24,23 @@ Add Knit to your `wally.toml`:
 Knit = "breezy1214/knit@^2"
 ```
 
-Then sync with your package manager:
+Then install dependencies:
 
 ```bash
 wally install
 ```
 
-### Manual Installation
+### Manual
 
-Download the latest release and place it in your project's dependencies folder.
+Download the latest release and place the module in `ReplicatedStorage`.
 
-## 📚 Documentation
+## Documentation
 
-Read the full [documentation](https://breezy1214.github.io/Knit/) for detailed guides and API reference.
+Full documentation is available in the [docs](docs/) directory and at the [documentation site](https://breezy1214.github.io/Knit/).
 
-## 🚀 Quick Start
+## Quick Start
 
-The core pattern is simple: create services on the server, controllers on the client, then start Knit.
+The core pattern: create services on the server, controllers on the client, then start Knit.
 
 ### Minimal Setup
 
@@ -46,30 +48,26 @@ The core pattern is simple: create services on the server, controllers on the cl
 local Knit = require(game:GetService("ReplicatedStorage").Packages.Knit)
 
 Knit.Start():catch(warn)
--- Knit.Start() returns a Promise for error handling
--- You can also chain :await() to yield until completion
 ```
 
-This code works on both server and client, but let's build something more interesting!
+This code works on both server and client. `Knit.Start()` returns a Promise.
 
-## 💡 Core Concepts
+## Core Concepts
 
 ### Services (Server-Side)
 
-Services handle your game's core logic and data management. With modern Knit, you simply create a table with a `Name` field - **no more `CreateService()` calls needed!**
+Services are singleton objects that handle server-side game logic. Define a service as a table with a `Name` field:
 
 ```lua
 -- MoneyService.luau (Server)
 local Knit = require(game:GetService("ReplicatedStorage").Packages.Knit)
 
--- ✨ Just create a table - Knit handles the rest!
 local MoneyService = {
     Name = "MoneyService",
 }
 
--- Server-only methods (private)
+-- Server-only methods (not accessible from clients)
 function MoneyService:GetMoney(player: Player): number
-    -- Your data logic here
     return someDataStore:GetAsync(tostring(player.UserId)) or 0
 end
 
@@ -78,7 +76,7 @@ function MoneyService:GiveMoney(player: Player, amount: number): ()
     someDataStore:SetAsync(tostring(player.UserId), currentMoney + amount)
 end
 
--- 🌉 Expose methods to clients via the Client table
+-- Methods on the Client table are exposed as RemoteFunctions
 function MoneyService.Client:GetMoney(player: Player): number
     return self.Server:GetMoney(player)
 end
@@ -97,20 +95,22 @@ return MoneyService
 
 ### Controllers (Client-Side)
 
-Controllers manage client-side logic and UI. Like services, they're just tables!
+Controllers manage client-side logic and UI. Like services, they are plain tables:
 
 ```lua
 -- MoneyController.luau (Client)
 local Knit = require(game:GetService("ReplicatedStorage").Packages.Knit)
 
--- ✨ No CreateController() needed!
 local MoneyController = {
     Name = "MoneyController",
 }
 
 function MoneyController:KnitStart()
+    -- Knit.GetService is the standard way to access server services from the client.
+    -- Note: this returns a network proxy, so you will not get type information or
+    -- IntelliSense for the service's methods.
     local MoneyService = Knit.GetService("MoneyService")
-    
+
     MoneyService:GetMoney():andThen(function(money: number)
         print("Player has", money, "coins")
     end):catch(warn)
@@ -119,23 +119,23 @@ end
 return MoneyController
 ```
 
-### Auto-Loading (Recommended)
+### Auto-Loading
 
-Instead of requiring each service/controller individually, modern Knit can auto-discover them:
+Instead of requiring each module individually, use auto-discovery to load services or controllers from a folder:
 
 ```lua
 -- Server script
 local Knit = require(game:GetService("ReplicatedStorage").Packages.Knit)
 
--- 🚀 Auto-load all services from a folder
+-- Load all ModuleScripts that are direct children of the folder
 Knit.AddServices(game.ServerScriptService.Services)
 
--- ✨ NEW: Use predicate functions to filter which services to load
+-- Filter with a predicate function
 Knit.AddServices(game.ServerScriptService.Services, function(moduleScript)
-    return moduleScript.Name:match("Service$") -- Only load files ending with "Service"
+    return moduleScript.Name:match("Service$")
 end)
 
--- 🔍 Load from nested folders with AddServicesDeep
+-- Recursively load from nested folders
 Knit.AddServicesDeep(game.ServerScriptService, function(moduleScript, parent, depth, path)
     return moduleScript.Name:match("Service$")
         and not moduleScript.Name:match("Test")
@@ -143,7 +143,7 @@ Knit.AddServicesDeep(game.ServerScriptService, function(moduleScript, parent, de
         and not path:match("/Legacy/")
 end)
 
--- Or pass only deep-scan options (no predicate)
+-- Pass only scan options (no predicate)
 Knit.AddServicesDeep(game.ServerScriptService, {
     MaxDepth = 4,
     IgnoreFolderPatterns = {"^Tests$", "^Dev$"},
@@ -153,53 +153,36 @@ Knit.Start():catch(warn)
 ```
 
 ```lua
--- Client script  
+-- Client script
 local Knit = require(game:GetService("ReplicatedStorage").Packages.Knit)
 
--- 🚀 Auto-load all controllers from a folder
 Knit.AddControllers(game.StarterPlayer.StarterPlayerScripts.Controllers)
-
--- ✨ NEW: Filter controllers with predicate functions
-Knit.AddControllers(game.StarterPlayer.StarterPlayerScripts.Controllers, function(moduleScript)
-    -- Only load controllers for the current platform
-    local isDesktop = game:GetService("UserInputService").KeyboardEnabled
-    if moduleScript.Name == "MobileController" then
-        return not isDesktop
-    elseif moduleScript.Name == "DesktopController" then
-        return isDesktop
-    end
-    return true -- Load all other controllers
-end)
 
 Knit.Start():catch(warn)
 ```
 
-## 🔧 Advanced Features
+## Advanced Features
 
-### Signals (Events)
+### Signals
 
-Create real-time communication between server and clients:
+Create server-to-client and client-to-server events:
 
 ```lua
--- Service with signals
 local ChatService = {
     Name = "ChatService",
     Client = {
-        -- ✨ Create signals with type safety
         MessageReceived = Knit.CreateSignal(),
-        PlayerJoined = Knit.CreateSignal(),
-    }
+    },
 }
 
 function ChatService:KnitStart()
-    -- Fire signals to all clients
     self.Client.MessageReceived:FireAll("Welcome to the game!")
-    
-    -- Fire to specific client
     self.Client.MessageReceived:Fire(somePlayer, "Hello " .. somePlayer.Name)
 end
+```
 
--- Client-side listening
+```lua
+-- Client
 local ChatService = Knit.GetService("ChatService")
 ChatService.MessageReceived:Connect(function(message: string)
     print("Received:", message)
@@ -208,177 +191,125 @@ end)
 
 ### Properties (State Sync)
 
-Synchronize state between server and clients automatically:
+Synchronize state between server and clients:
 
 ```lua
--- Service with properties
 local GameStateService = {
-    Name = "GameStateService", 
+    Name = "GameStateService",
     Client = {
-        -- ✨ Properties with initial values
         RoundTime = Knit.CreateProperty(0),
         GameMode = Knit.CreateProperty("Lobby"),
-        PlayerCount = Knit.CreateProperty(0),
-    }
+    },
 }
 
 function GameStateService:UpdateRoundTime(newTime: number)
-    -- Automatically syncs to all clients
     self.Client.RoundTime:Set(newTime)
 end
+```
 
--- Client-side observing
+```lua
+-- Client
 local GameStateService = Knit.GetService("GameStateService")
 GameStateService.RoundTime:Observe(function(time: number)
     print("Round time:", time)
 end)
 ```
 
+### Unreliable Signals
+
+For non-critical data where dropped or out-of-order packets are acceptable (e.g., cosmetic effects), use unreliable signals to reduce bandwidth:
+
+```lua
+Client = {
+    PlayEffect = Knit.CreateUnreliableSignal(),
+}
+```
+
 ### Lifecycle Methods
 
-Control when your services and controllers initialize and start:
+Services and controllers support two lifecycle hooks:
+
+| Method | When It Runs | Safe To Do |
+|---|---|---|
+| `KnitInit` | After all services/controllers are created, before any `KnitStart` | Set up internal state; reference (but do not call) other services |
+| `KnitStart` | After all `KnitInit` methods complete | Freely use other services and controllers |
 
 ```lua
 local MyService = {
     Name = "MyService",
-    DependsOn = {"OtherService"}, -- Optional explicit startup dependency ordering
+    DependsOn = {"OtherService"}, -- Optional: explicit init ordering
 }
 
--- Called when Knit.Start() begins (before other services start)
 function MyService:KnitInit()
-    print("Service initializing...")
-    -- Set up internal state, connect to datastores, etc.
+    -- Set up internal state
 end
 
--- Called after all services have initialized
-function MyService:KnitStart() 
-    print("Service started!")
-    -- Safe to reference other services here
-    local OtherService = Knit.GetService("OtherService")
+function MyService:KnitStart()
+    local OtherService = require(path.to.OtherService)
 end
+```
 
--- Optional: make startup wait for KnitStart handlers and reject on errors
+### Deterministic Start
+
+By default, `Knit.Start()` resolves as soon as all `KnitStart` methods are dispatched (fire-and-forget). Enable deterministic mode to wait for all handlers to complete and surface errors:
+
+```lua
 Knit.Start({
     DeterministicStart = true,
-}):catch(warn)
-
--- If one or more KnitStart handlers fail in deterministic mode,
--- Knit.Start rejects with an aggregate error table:
--- {
---   Message = "KnitStart failed for N service(s)",
---   Errors = {
---     { Name = "ServiceName", Error = <traceback or rejection value> },
---     ...
---   }
--- }
+}):catch(function(err)
+    -- err.Message = "KnitStart failed for N service(s)"
+    -- err.Errors = { { Name = "ServiceName", Error = <traceback> }, ... }
+    warn(err.Message)
+end)
 ```
 
 ### Middleware
 
-Add custom logic to intercept and modify requests:
+Intercept and transform inbound/outbound network traffic:
 
 ```lua
--- Server middleware example
 local function authMiddleware(player: Player, args: {any}): (boolean, ...any)
     if not player:GetAttribute("IsAuthenticated") then
         return false -- Block the request
     end
-    return true, unpack(args) -- Allow and pass through
+    return true, unpack(args)
 end
 
 Knit.Start({
     Middleware = {
         Inbound = { authMiddleware },
         Outbound = {},
-    }
+    },
 }):catch(warn)
 ```
 
-## 📋 Best Practices
+See the [Middleware](docs/middleware.md) documentation for per-service middleware and client-side examples.
 
-### Type Safety Tips
-
-```lua
--- ✅ Use proper typing for better IntelliSense
-export type PlayerData = {
-    coins: number,
-    level: number,
-    inventory: {string}
-}
-
-local DataService = {
-    Name = "DataService",
-}
-
-function DataService:GetPlayerData(player: Player): PlayerData
-    -- Return properly typed data
-end
-```
-
-### Error Handling
-
-```lua
--- ✅ Always handle promise rejections
-local MoneyService = Knit.GetService("MoneyService")
-
-MoneyService:GetMoney()
-    :andThen(function(money: number)
-        print("Success:", money)
-    end)
-    :catch(function(err)
-        warn("Failed to get money:", err)
-    end)
-```
-
-## 🆚 Migration from Legacy Knit
-
-If you're upgrading from an older version:
+## Migration from Legacy Knit
 
 ### Service/Controller Creation
 
 ```lua
--- ❌ Old way (still works but not recommended)
+-- Legacy (still supported)
 local MoneyService = Knit.CreateService({
     Name = "MoneyService",
 })
 
--- ✅ New way (better IntelliSense + type safety)
+-- Current (recommended)
 local MoneyService = {
     Name = "MoneyService",
 }
-
 return MoneyService
 ```
 
-### Auto-Loading Improvements
+### Auto-Loading
 
-```lua
--- ✅ New way - smart auto-loading with predicates
-Knit.AddServices(game.ServerScriptService.Services, function(moduleScript)
-    -- Fine-grained control over which services to load
-    return moduleScript.Name:match("Service$")
-end)
+The `AddServices`, `AddServicesDeep`, `AddControllers`, and `AddControllersDeep` functions replace manual `require` loops and support predicate-based filtering and scan options.
 
--- 🔥 Even better - deep loading with filters
-Knit.AddServicesDeep(game.ServerScriptService, function(moduleScript, parent, depth, path)
-    -- Load services from nested folders, skip test/dev directories
-    return moduleScript.Name:match("Service$")
-        and not path:match("/Tests/")
-        and not path:match("/Dev/")
-        and depth <= 4
-end, {
-    IgnoreFolderPatterns = {"^Tests$", "^Dev$"},
-})
-```
+## Contributing
 
-## 🤝 Contributing
+Contributions are welcome. Submit pull requests to the repository.
 
-Contributions are welcome! Submit pull requests to the repository.
+## License
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
-
----
-
-### Happy coding with Knit! 🧶
+This project is licensed under the MIT License. See [LICENSE.md](LICENSE.md) for details.

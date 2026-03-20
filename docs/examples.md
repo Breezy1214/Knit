@@ -4,79 +4,75 @@ sidebar_position: 7
 
 # Examples
 
-## Start All Services
+## Auto-Loading All Services
 
-A useful pattern is to keep all service modules within a folder. The script that starts Knit can then require all of these at once. Let's say we have a directory structure like such:
+A common pattern is to keep all service ModuleScripts within a single folder. The bootstrap script then loads them all at once.
 
-- Server
-	- KnitRuntime [Script]
-	- Services [Folder]
-		- MyService [Module]
-		- AnotherService [Module]
-		- HelloService [Module]
+Directory structure:
 
-We can write our KnitRuntime script as such:
+```
+Server/
+    KnitRuntime [Script]
+    Services/ [Folder]
+        MyService [ModuleScript]
+        AnotherService [ModuleScript]
+        HelloService [ModuleScript]
+```
+
+Bootstrap script:
 
 ```lua
 local Knit = require(game:GetService("ReplicatedStorage").Packages.Knit)
 
--- Load all services:
+-- Option 1: Manual loop
 for _, v in script.Parent.Services:GetDescendants() do
-	if v:IsA("ModuleScript") then
-		require(v)
-	end
+    if v:IsA("ModuleScript") then
+        require(v)
+    end
 end
 
 Knit.Start():catch(warn)
 ```
 
-Alternatively, we can use `Knit.AddServices` or `Knit.AddServicesDeep` to load all of the services without writing a loop. It scans and loads all ModuleScripts found:
-
 ```lua
 local Knit = require(game:GetService("ReplicatedStorage").Packages.Knit)
 
--- Load all services within 'Services':
+-- Option 2: AddServices (direct children only)
 Knit.AddServices(script.Parent.Services)
 
--- Load all services (the Deep version scans all descendants of the passed instance):
+-- Option 3: AddServicesDeep (all descendants)
 Knit.AddServicesDeep(script.Parent.OtherServices)
 
--- Load deep with controls:
+-- Option 4: AddServicesDeep with filtering
 Knit.AddServicesDeep(script.Parent.OtherServices, function(moduleScript, parent, depth, path)
-  return moduleScript.Name:match("Service$")
-    and depth <= 3
-    and not path:match("/Tests/")
+    return moduleScript.Name:match("Service$")
+        and depth <= 3
+        and not path:match("/Tests/")
 end, {
-  IgnoreFolderPatterns = {"^Tests$", "^Dev$"},
+    IgnoreFolderPatterns = {"^Tests$", "^Dev$"},
 })
 
 Knit.Start():catch(warn)
 ```
 
-:::tip
-This same design practice can also be done on the client with controllers. Either loop through and collect controllers or use the `Knit.AddControllers` or `Knit.AddControllersDeep` function.
-:::
+The same approach works on the client with `Knit.AddControllers` and `Knit.AddControllersDeep`.
 
-----------------
+---
 
-## Expose a Collection of Modules
+## Exposing a Module Collection
 
-Like `Knit.Util`, we can expose a collection of modules to our codebase. This is very simple. All we need to do is add `Knit.WHATEVER` and point it to a folder of ModuleScripts.
-
-For instance, if we had a folder of modules at `ReplicatedStorage.MyModules`, we can expose this within our main runtime script:
+Similar to `Knit.Util`, you can attach any folder of ModuleScripts to the Knit table for convenient access across your codebase.
 
 ```lua
 local Knit = require(game:GetService("ReplicatedStorage").Packages.Knit)
 
--- Expose our MyModules folder:
+-- Attach a custom module folder
 Knit.MyModules = game:GetService("ReplicatedStorage").MyModules
-
--- Load services/controllers
 
 Knit.Start()
 ```
 
-We can then use these modules elsewhere. For instance:
+Other scripts can then require modules from it:
 
 ```lua
 local SomeModule = require(Knit.MyModules.SomeModule)

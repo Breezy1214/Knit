@@ -6,143 +6,121 @@ sidebar_position: 2
 
 ## Tutorial Videos
 
-Knit can be used via two workflows: Roblox Studio and externally with Rojo and Wally. To help explain how Knit is used through both workflows, check out the tutorial videos for each:
+Knit supports two workflows: Roblox Studio and external tooling with Rojo and Wally. The following tutorials cover each approach:
 
 - [Knit Tutorial for Studio](https://youtu.be/0Ty2ojfdOnA)
 - [Knit Tutorial for Rojo/Wally](https://youtu.be/tgndvNQ5agA)
 
-## Install
+## Installation
 
-Installing Knit is very simple. Just drop the module into ReplicatedStorage. Knit can also be used within a Rojo project.
+### Rojo/Wally Workflow
 
-<!-- **Roblox Studio workflow:**
+Add Knit to your `wally.toml` dependency list:
 
-- Get [Knit](https://www.roblox.com/library/5530714855/Knit) from the Roblox library.
-- Place Knit directly within ReplicatedStorage. -->
+```toml
+[dependencies]
+Knit = "breezy1214/knit@^2"
+```
 
-**Rojo/Wally workflow:**
+Then require Knit like any other Wally-managed module.
 
-- Add Knit to your `wally.toml` dependency list (e.g. `Knit = "Breezy1214/knit@^1.7"`)
-- Require Knit like any other module grabbed from Wally
+> **Note:** Wally is a package manager for the Roblox ecosystem, similar to NPM. For setup instructions, see the [Wally repository](https://github.com/UpliftGames/wally).
 
-	:::note Wally
-	Not familiar with Wally? Wally is a package manager (like NPM) for the Roblox ecosystem.
-	To get started, check out the [Wally repository](https://github.com/UpliftGames/wally).
+### Studio Workflow
+
+Place the Knit module directly into ReplicatedStorage.
 
 ## Basic Usage
 
-The core usage of Knit is the same from the server and the client. The general pattern is to create a single script on the server and a single script on the client. These scripts will load Knit, create services/controllers, and then start Knit.
+The usage pattern is the same on both server and client: require Knit, register services or controllers, then call `Knit.Start()`.
 
-The most basic usage would look as such:
+The simplest possible setup:
 
 ```lua
 local Knit = require(game:GetService("ReplicatedStorage").Packages.Knit)
 
 Knit.Start():catch(warn)
--- Knit.Start() returns a Promise, so we are catching any errors and feeding it to the built-in 'warn' function
--- You could also chain 'await()' to the end to yield until the whole sequence is completed:
---    Knit.Start():catch(warn):await()
 ```
 
-That would be the necessary code on both the server and the client. However, nothing interesting is going to happen. Let's dive into some more examples.
+`Knit.Start()` returns a Promise. Use `:catch(warn)` to surface errors, or chain `:await()` to yield until startup completes.
 
 ### A Simple Service
 
-A service is simply a structure that _serves_ some specific purpose. For instance, a game might have a MoneyService, which manages in-game currency for players. Let's look at a simple example:
+A service is a singleton object that handles a specific domain of game logic. The following example defines a basic `MoneyService`:
 
 ```lua
 local Knit = require(game:GetService("ReplicatedStorage").Packages.Knit)
 
--- Create the service:
 local MoneyService = {
- 	Name = "MoneyService",
+    Name = "MoneyService",
 }
 
--- Add some methods to the service:
-
 function MoneyService:GetMoney(player)
-	-- Do some sort of data fetch
-	local money = someDataStore:GetAsync("money")
-	return money
+    local money = someDataStore:GetAsync("money")
+    return money
 end
 
 function MoneyService:GiveMoney(player, amount)
-	-- Do some sort of data fetch
-	local money = self:GetMoney(player)
-	money += amount
-	someDataStore:SetAsync("money", money)
+    local money = self:GetMoney(player)
+    money += amount
+    someDataStore:SetAsync("money", money)
 end
 
 Knit.Start():catch(warn)
 ```
 
-:::note
-It's better practice to put services and controllers within their own ModuleScript and then require them from your main script. For the sake of simplicity, they are all in one script for these examples.
-:::
+> **Note:** In practice, services and controllers should be placed in their own ModuleScripts and required from a single bootstrap script. The examples here are consolidated for clarity.
 
-Now we have a little MoneyService that can get and give money to a player. However, only the server can use this at the moment. What if we want clients to fetch how much money they have? To do this, we have to create some client-side code to consume our service. We _could_ create a controller, but it's not necessary for this example.
+### Exposing Methods to Clients
 
-First, we need to expose a method to the client. We can do this by writing methods on the service's Client table:
+To make a method callable from the client, define it on the service's `Client` table:
 
 ```lua
--- Money service on the server
-...
 function MoneyService.Client:GetMoney(player)
-	-- We already wrote this method, so we can just call the other one.
-	-- 'self.Server' will reference back to the root MoneyService.
-	return self.Server:GetMoney(player)
+    return self.Server:GetMoney(player)
 end
-...
 ```
 
-We can write client-side code to fetch money from the service:
+Under the hood, Knit creates a RemoteFunction bound to this method.
+
+On the client:
 
 ```lua
--- Client-side code
 local Knit = require(game:GetService("ReplicatedStorage").Packages.Knit)
 Knit.Start():catch(warn):await()
 
 local MoneyService = Knit.GetService("MoneyService")
 
 MoneyService:GetMoney():andThen(function(money)
-	print(money)
+    print(money)
 end)
-
--- Don't want to use promises? When you start Knit on the client,
--- set the ServicePromises option to false:
 ```
 
-:::tip Turn Off Promises
-Don't want to use promises when the client calls a service method? Set the `ServicePromises` option to `false` when you start Knit on the client:
-```lua
-Knit.Start({ServicePromises = false}):catch(warn):await()
+> **Disabling Promises:** By default, client calls to service methods return Promises. To use synchronous (yielding) calls instead, set `ServicePromises` to `false`:
+> ```lua
+> Knit.Start({ServicePromises = false}):catch(warn):await()
+>
+> local MoneyService = Knit.GetService("MoneyService")
+> local money = MoneyService:GetMoney()
+> ```
 
-local MoneyService = Knit.GetService("MoneyService")
+## Deep Auto-Loading
 
-local money = MoneyService:GetMoney()
-```
-:::
-
-Under the hood, Knit is creating a RemoteFunction bound to the service's GetMoney method. Knit keeps RemoteFunctions and RemoteEvents out of the way so that developers can focus on writing code and not building communication infrastructure.
-
-## Deep Auto-Loading Controls
-
-When using `Knit.AddServicesDeep` or `Knit.AddControllersDeep`, you can provide a predicate with richer context and optional deep search controls:
+When using `Knit.AddServicesDeep` or `Knit.AddControllersDeep`, a predicate function receives extended context and optional scan controls can be provided:
 
 ```lua
 Knit.AddServicesDeep(game.ServerScriptService.Services, function(moduleScript, parent, depth, path)
-  return moduleScript.Name:match("Service$")
-    and depth <= 3
-    and not path:match("/Tests/")
+    return moduleScript.Name:match("Service$")
+        and depth <= 3
+        and not path:match("/Tests/")
 end, {
-  MaxDepth = 4,
-  IgnoreFolderPatterns = {"^Tests$", "^Dev$"},
+    MaxDepth = 4,
+    IgnoreFolderPatterns = {"^Tests$", "^Dev$"},
 })
 ```
 
 - `depth` starts at `1` for direct children of the root instance.
-- `path` is the module path relative to the root instance, separated by `/`.
-- You can pass only options by omitting the predicate:
-  `Knit.AddServicesDeep(root, { MaxDepth = 2 })`
+- `path` is the module path relative to the root, separated by `/`.
+- The predicate can be omitted to pass only options: `Knit.AddServicesDeep(root, { MaxDepth = 2 })`.
 
-Check out the [Services](services.md) documentation for more info on services.
+See the [Services](services.md) documentation for the full API.

@@ -2,38 +2,39 @@
 sidebar_position: 5
 ---
 
-# Util
+# Utility Modules
 
-## Knit via Wally
-When installing Knit with Wally, developers should pull in utility modules
-via Wally as required. Knit's utility modules are significantly slimmed down
-in the Wally release.
+## Wally Users
 
-## Knit via ModuleScript
-Knit comes with a few utility modules. If Knit is being used from the packaged
-ModuleScript, then the best way to access these modules is via `require(Knit.Util.PACKAGE)`.
+When using Knit via Wally, pull in utility modules as separate Wally dependencies. The Knit Wally package includes only the modules necessary for core framework operation.
+
+## Standalone ModuleScript Users
+
+When using Knit as a standalone ModuleScript, utility modules are accessible via `require(Knit.Util.PACKAGE)`.
 
 The following modules are available:
 
-- [`Knit.Util.Comm`](https://sleitnick.github.io/RbxUtil/api/Comm)
-- [`Knit.Util.Component`](https://sleitnick.github.io/RbxUtil/api/Component)
-- [`Knit.Util.EnumList`](https://sleitnick.github.io/RbxUtil/api/EnumList)
-- [`Knit.Util.Input`](https://sleitnick.github.io/RbxUtil/api/Input)
-- [`Knit.Util.Option`](https://sleitnick.github.io/RbxUtil/api/Option)
-- [`Knit.Util.Signal`](https://sleitnick.github.io/RbxUtil/api/Signal)
-- [`Knit.Util.Streamable`](https://sleitnick.github.io/RbxUtil/api/Streamable)
-- [`Knit.Util.TableUtil`](https://sleitnick.github.io/RbxUtil/api/TableUtil)
-- [`Knit.Util.Timer`](https://sleitnick.github.io/RbxUtil/api/Timer)
-- [`Knit.Util.Trove`](https://sleitnick.github.io/RbxUtil/api/Trove)
-- [`Knit.Util.Promise`](https://eryn.io/roblox-lua-promise/api/Promise)
+| Module | Documentation |
+|---|---|
+| `Knit.Util.Comm` | [Comm API](https://sleitnick.github.io/RbxUtil/api/Comm) |
+| `Knit.Util.Component` | [Component API](https://sleitnick.github.io/RbxUtil/api/Component) |
+| `Knit.Util.EnumList` | [EnumList API](https://sleitnick.github.io/RbxUtil/api/EnumList) |
+| `Knit.Util.Input` | [Input API](https://sleitnick.github.io/RbxUtil/api/Input) |
+| `Knit.Util.Option` | [Option API](https://sleitnick.github.io/RbxUtil/api/Option) |
+| `Knit.Util.Signal` | [Signal API](https://sleitnick.github.io/RbxUtil/api/Signal) |
+| `Knit.Util.Streamable` | [Streamable API](https://sleitnick.github.io/RbxUtil/api/Streamable) |
+| `Knit.Util.TableUtil` | [TableUtil API](https://sleitnick.github.io/RbxUtil/api/TableUtil) |
+| `Knit.Util.Timer` | [Timer API](https://sleitnick.github.io/RbxUtil/api/Timer) |
+| `Knit.Util.Trove` | [Trove API](https://sleitnick.github.io/RbxUtil/api/Trove) |
+| `Knit.Util.Promise` | [Promise API](https://eryn.io/roblox-lua-promise/api/Promise) |
 
-Below is an example of the Signal class being used in a service:
+### Example
 
 ```lua
 local Signal = require(Knit.Util.Signal)
 
 local MyService = {
-	Name = "MyService",
-	SomeSignal = Signal.new(),
+    Name = "MyService",
+    SomeSignal = Signal.new(),
 }
 ```

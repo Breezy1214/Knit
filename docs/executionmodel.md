@@ -6,18 +6,20 @@ sidebar_position: 6
 
 ## Lifecycle
 
-The execution model of Knit defines the flow of operations and lifecycle of Knit.
+The execution model defines the initialization sequence and lifecycle of Knit:
 
-1. Require the Knit module
-1. Create services or controllers
-1. Call `Knit.Start()`, which immediately returns a Promise
-	1. All `KnitInit` methods are invoked at the same time, and waits for all to finish
-	1. All `KnitStart` methods are invoked at the same time
-1. After all `KnitStart` methods are called, the promise returned by `Knit.Start()` resolves
+1. Require the Knit module.
+2. Create services (server) or controllers (client).
+3. Call `Knit.Start()`, which returns a Promise.
+   1. All `KnitInit` methods are called sequentially (in dependency order) and awaited.
+   2. All `KnitStart` methods are called concurrently.
+4. The Promise returned by `Knit.Start()` resolves after all `KnitStart` methods are dispatched (or completed, if `DeterministicStart` is enabled).
 
 ![Lifecycle](/lifecycle.svg)
 
-On the server, you should have one Script in ServerScriptService. On the client, you should have one LocalScript in PlayerStarterScripts. Each of these scripts should have a similar layout:
+### Recommended Script Layout
+
+On the server, use a single Script in ServerScriptService. On the client, use a single LocalScript in PlayerStarterScripts. Both follow this pattern:
 
 ```lua
 local Knit = require(game:GetService("ReplicatedStorage").Packages.Knit)
@@ -27,35 +29,32 @@ local Knit = require(game:GetService("ReplicatedStorage").Packages.Knit)
 Knit.Start():catch(warn)
 ```
 
-Once services or controllers are created, they persist forever (until the server shuts down or the player leaves).
+Once created, services and controllers persist for the lifetime of the session (until the server shuts down or the player leaves).
 
-:::caution
-Services and controllers **_cannot_** be created after `Knit.Start()` has been called.
-:::
+> **Important:** Services and controllers cannot be created after `Knit.Start()` has been called.
 
-## Catching KnitInit Errors
-Due to the way Promises work, errors that occur within `KnitInit` methods of services or controllers will be caught as a rejected promise. These can be handled by either grabbing the status after using `Await` or using the `Catch()` method:
+## Error Handling
+
+Errors that occur within `KnitInit` methods are captured as rejected promises. Handle them via `await()` or `catch()`:
 
 ```lua
 local success, err = Knit.Start():await()
 if not success then
-	-- Handle error
-	error(tostring(err))
+    error(tostring(err))
 end
 ```
 
 ```lua
 Knit.Start():catch(function(err)
-	-- Handle error
-	warn(tostring(err))
+    warn(tostring(err))
 end)
 ```
 
 ## Best Practices
-- Only one Script on the server should manage loading services and starting Knit
-- Only one LocalScript on the client should manage loading controllers and starting Knit
-- Split up services and controllers into their own modules
-- Services should be kept in either ServerStorage or ServerScriptService to avoid being exposed to the client
-- Code within `KnitInit` and within the root scope of the ModuleScript should try to finish ASAP, and should avoid yielding if possible
-- Events and methods should never be added to a service's Client table after `Knit.Start()` has been called
-- As shown above in the [Catching knitInit Errors](#catching-knitinit-errors) section, handling a failure case of `Start` is the cleanest way to catch errors on startup.
+
+- Use a single Script on the server and a single LocalScript on the client to manage startup.
+- Place each service and controller in its own ModuleScript.
+- Keep services in ServerStorage or ServerScriptService to prevent client access to source code.
+- Code within `KnitInit` and the root scope of ModuleScripts should complete quickly and avoid yielding where possible.
+- Do not add methods or events to a service's `Client` table after `Knit.Start()` has been called.
+- Always handle the failure case of `Knit.Start()` to catch initialization errors.

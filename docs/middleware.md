@@ -4,145 +4,160 @@ sidebar_position: 8
 
 # Middleware
 
-Knit's networking layer uses the [Comm](https://sleitnick.github.io/RbxUtil/api/Comm/) module internally, which allows for middleware to be introduced at both the inbound and outbound level. For example, if a service had a client method called `GetMoney(player)`, and the client called that method, your service would then fire that function. If there is any inbound middleware on the server, the inbound middleware would fire _before_ `GetMoney` is fired. And the outbound middleware would fire _after_ GetMoney is fired.
+Knit's networking layer uses the [Comm](https://sleitnick.github.io/RbxUtil/api/Comm/) module internally, which supports middleware at both the inbound and outbound level.
 
-Middleware can be used to both transform inbound/outbound arguments, and also decide to drop requests/responses. This is useful for many use-cases, such as automatically serializing/deserializing complex data types over the network, or sanitizing incoming data.
+When a client calls a service method (e.g., `GetMoney`), server-side inbound middleware runs before the method executes, and outbound middleware runs after it returns. This allows you to transform arguments, validate requests, or short-circuit responses.
 
-Middleware can be added on both the server and client, and affects functions and signals. Middleware can either be added at the Knit global level, or per service.
+Middleware applies to both functions and signals. It can be configured at the global level (affecting all services) or per service.
+
+## Function Signatures
+
+Each middleware function receives the arguments and must return a boolean indicating whether to continue processing:
+
+- **Client:** `(args: {any}) -> (boolean, ...any)`
+- **Server:** `(player: Player, args: {any}) -> (boolean, ...any)`
+
+Returning `false` blocks the request. An optional variadic list after `false` is returned to the caller as a short-circuit response.
 
 ## Usage
 
-Middleware is added when Knit is started: `Knit.Start({Middleware = {Inbound = {...}, Outbound = {...}}})` _or_ on each service. Each "middleware" item in the tables is a function. On the client, this function takes an array table containing all the arguments passed along. On the server, it is nearly the same, except the first argument before the arguments table is the player.
+Middleware is provided when starting Knit:
 
-Each function should return a boolean, indicating whether or not to continue to the request/response. If `false`, an optional variadic list of items can be returned, which will be returned back to the caller (essentially a short-circuit, but still returning data).
+```lua
+Knit.Start({
+    Middleware = {
+        Inbound = { ... },
+        Outbound = { ... },
+    },
+})
+```
 
-- Client middleware function signature: `(args: {any}) -> (boolean, ...)`
-- Server middleware function signature: `(player: Player, args: {any}) -> (boolean, ...)`
+## Examples
 
-### Examples
+### Logger
 
-#### Logger
+Client-side logger that prints all inbound data from the server:
 
-Here's an example on the client which logs all inbound data from the server:
 ```lua
 local function Logger(args: { any })
-	print(args)
-	return true
+    print(args)
+    return true
 end
 
 Knit.Start({
-	Middleware = { Inbound = { Logger } }
+    Middleware = { Inbound = { Logger } },
 })
 ```
 
-Here's the same thing, but on the server. As you can see, the only difference is that the `player` argument is added to the middleware function:
+Server-side equivalent (includes the `player` parameter):
+
 ```lua
 local function Logger(player: Player, args: { any })
-	print(player, args)
-	return true
+    print(player, args)
+    return true
 end
 
 Knit.Start({
-	Middleware = { Inbound = { Logger } }
+    Middleware = { Inbound = { Logger } },
 })
 ```
 
-#### Manipulation
+### Argument Transformation
 
-A more complex example, where any inbound number to the client is multiplied by 2:
+Multiply all inbound numbers by 2 on the client:
+
 ```lua
 local function DoubleNumbers(args)
-	for i, v in args do
-		if type(v) == "number" then
-			args[i] *= 2
-		end
-	end
-	return true
+    for i, v in args do
+        if type(v) == "number" then
+            args[i] *= 2
+        end
+    end
+    return true
 end
 
 Knit.Start({ Middleware = { Inbound = { DoubleNumbers } } })
 ```
 
-#### Per-Service Example
+### Per-Service Middleware
 
-Middleware can also be targeted per-service, which will override the global level middleware for the given service.
+Middleware can be scoped to a specific service, overriding the global middleware for that service.
+
+On the server, define middleware directly on the service:
+
 ```lua
--- Server-side:
 local MyService = {
-	Name = "MyService",
-	Client = {},
-	Middleware = {
-		Inbound = { Logger },
-		Outbound = {},
-	},
+    Name = "MyService",
+    Client = {},
+    Middleware = {
+        Inbound = { Logger },
+        Outbound = {},
+    },
 }
 ```
 
-On the client, things look a little different. Middleware is still per-service, not controller, so the definitions of per-service middleware need to go within `Knit.Start()` on the client:
+On the client, per-service middleware is specified within `Knit.Start()`:
+
 ```lua
--- Client-side:
 Knit.Start({
-	PerServiceMiddleware = {
-		-- Mapped by name of the service
-		MyService = {
-			Inbound = { Logger },
-			Outbound = {},
-		},
-	},
+    PerServiceMiddleware = {
+        MyService = {
+            Inbound = { Logger },
+            Outbound = {},
+        },
+    },
 })
 ```
 
-#### Serialization
+### Serialization
 
-Another example, where a simple class is serialized/deserialized on the client before/after remote network communication occurs. A similar setup could be used server-side to complete the loop:
+The following example serializes and deserializes a custom class on the client. A corresponding setup on the server would complete the round trip.
+
 ```lua
------------------------------------------------------
--- Setup a simple class:
+-- Define a simple class with serialization support
 local MyClass = {}
 MyClass.__index = MyClass
 MyClass.ClassName = "MyClass"
 
 function MyClass.new()
-	return setmetatable({
-		SomeData = "",
-	}, MyClass)
+    return setmetatable({
+        SomeData = "",
+    }, MyClass)
 end
 
 function MyClass:Serialize()
-	return { _CN = self.ClassName, D = self.SomeData }
+    return { _CN = self.ClassName, D = self.SomeData }
 end
 
 function MyClass.deserialize(data)
-	local myClass = MyClass.new()
-	myClass.SomeData = data
-	return myClass
+    local myClass = MyClass.new()
+    myClass.SomeData = data
+    return myClass
 end
------------------------------------------------------
 
--- Setup middleware for class serialization/deserialization on client:
-
+-- Middleware functions
 local function InboundClass(args)
-	for i, v in args do
-		if type(v) == "table" and v._CN == "MyClass" then
-			args[i] = MyClass.deserialize(v)
-		end
-	end
-	return true
+    for i, v in args do
+        if type(v) == "table" and v._CN == "MyClass" then
+            args[i] = MyClass.deserialize(v)
+        end
+    end
+    return true
 end
 
 local function OutboundClass(args)
-	for i, v in args do
-		if type(v) == "table" and v.ClassName == "MyClass" then
-			args[i] = v:Serialize()
-		end
-	end
-	return true
+    for i, v in args do
+        if type(v) == "table" and v.ClassName == "MyClass" then
+            args[i] = v:Serialize()
+        end
+    end
+    return true
 end
 
 Knit.Start({
-	Middleware = {
-		Inbound = { InboundClass },
-		Outbound = { OutboundClass },
-	},
+    Middleware = {
+        Inbound = { InboundClass },
+        Outbound = { OutboundClass },
+    },
 })
 ```

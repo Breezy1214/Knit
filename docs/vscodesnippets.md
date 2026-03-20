@@ -4,42 +4,40 @@ sidebar_position: 10
 
 # VS Code Snippets
 
-Being able to quickly create services, controllers, or other Knit-related items is very useful when using Knit as a framework. To keep Knit lightweight, there are no required extensions or plugins. Instead, below are some VS Code snippets that can be used to speed up development.
+VS Code snippets allow you to quickly scaffold services, controllers, and other common Knit patterns. No extensions or plugins are required.
 
 ![Snippets](/snippets.gif)
 
-## Using Snippets
-Snippets are a Visual Studio Code feature. Check out the [Snippets documentation](https://code.visualstudio.com/docs/editor/userdefinedsnippets) for more info. Adding Snippets for Lua is very easy.
+## Setup
 
-1. Within Visual Studio, navigate from the toolbar: `File -> Preferences -> User Snippets`
-1. Type in and select `lua.json`
-1. Within the `{}` braces, include any or all of the snippets below
-1. Save the file
-1. Within your actual source files, start typing a prefix (e.g. "knit") and select the autocompleted snippet to paste it in
-1. Depending on the snippet, parts of the pasted code will be selected and can be typed over (e.g. setting the name of a service)
+1. In VS Code, navigate to **File > Preferences > User Snippets**.
+2. Type and select `lua.json`.
+3. Add any of the snippets below inside the `{}` braces.
+4. Save the file.
+5. In your source files, type a prefix (e.g., `knit`) and select the autocomplete suggestion.
 
--------------------------------------
+---
 
-## Knit Snippets
+## Snippets
 
-Below are useful VS Code snippets for Knit. The snippets assume that the Knit module has been placed within ReplicatedStorage.
+### Knit Require
 
-### Knit
-Include a `require` statement for Knit.
-<details class="note">
+Inserts a `require` statement for Knit.
+
+<details>
 <summary>Snippet</summary>
 
 ```json
 "Knit": {
-	"prefix": ["knit"],
-	"body": ["local Knit = require(ReplicatedStorage.Packages.Knit)"],
-	"description": "Require the Knit module"
+    "prefix": ["knit"],
+    "body": ["local Knit = require(ReplicatedStorage.Packages.Knit)"],
+    "description": "Require the Knit module"
 }
 ```
 
 </details>
-<details class="success">
-<summary>Code Result</summary>
+<details>
+<summary>Output</summary>
 
 ```lua
 local Knit = require(ReplicatedStorage.Packages.Knit)
@@ -47,24 +45,26 @@ local Knit = require(ReplicatedStorage.Packages.Knit)
 
 </details>
 
--------------------------------------
+---
 
-### Service
-Reference a Roblox service.
+### Roblox Service
 
-<details class="note">
+References a Roblox engine service.
+
+<details>
 <summary>Snippet</summary>
 
 ```json
 "Service": {
-	"prefix": ["service"],
-	"body": ["local ${0:Name}Service = game:GetService(\"${0:Name}Service\")"],
-	"description": "Roblox Service"
+    "prefix": ["service"],
+    "body": ["local ${0:Name}Service = game:GetService(\"${0:Name}Service\")"],
+    "description": "Roblox Service"
 }
 ```
+
 </details>
-<details class="success">
-<summary>Code Result</summary>
+<details>
+<summary>Output</summary>
 
 ```lua
 local HttpService = game:GetService("HttpService")
@@ -72,52 +72,54 @@ local HttpService = game:GetService("HttpService")
 
 </details>
 
--------------------------------------
+---
 
 ### Knit Service
-Reference Knit, create a service, and return the service.
-<details class="note">
+
+Creates a complete service template.
+
+<details>
 <summary>Snippet</summary>
 
 ```json
 "Knit Service": {
-	"prefix": ["knitservice"],
-	"body": [
-		"local Knit = require(ReplicatedStorage.Packages.Knit)",
-		"",
-		"local ${0:$TM_FILENAME_BASE} = {",
-		"\tName = \"${0:$TM_FILENAME_BASE}\",",
-		"\tClient = {},",
-		"}",
-		"",
-		"",
-		"function ${0:$TM_FILENAME_BASE}:KnitStart()",
-		"\t",
-		"end",
-		"",
-		"",
-		"function ${0:$TM_FILENAME_BASE}:KnitInit()",
-		"\t",
-		"end",
-		"",
-		"",
-		"return ${0:$TM_FILENAME_BASE}",
-		""
-	],
-	"description": "Knit Service template"
+    "prefix": ["knitservice"],
+    "body": [
+        "local Knit = require(ReplicatedStorage.Packages.Knit)",
+        "",
+        "local ${0:$TM_FILENAME_BASE} = {",
+        "\tName = \"${0:$TM_FILENAME_BASE}\",",
+        "\tClient = {},",
+        "}",
+        "",
+        "",
+        "function ${0:$TM_FILENAME_BASE}:KnitStart()",
+        "\t",
+        "end",
+        "",
+        "",
+        "function ${0:$TM_FILENAME_BASE}:KnitInit()",
+        "\t",
+        "end",
+        "",
+        "",
+        "return ${0:$TM_FILENAME_BASE}",
+        ""
+    ],
+    "description": "Knit Service template"
 }
 ```
 
 </details>
-<details class="success">
-<summary>Code Result</summary>
+<details>
+<summary>Output</summary>
 
 ```lua
 local Knit = require(ReplicatedStorage.Packages.Knit)
 
 local MyService = {
-	Name = "MyService",
-	Client = {},
+    Name = "MyService",
+    Client = {},
 }
 
 function MyService:KnitStart()
@@ -131,48 +133,50 @@ return MyService
 
 </details>
 
--------------------------------------
+---
 
 ### Knit Controller
-Reference Knit, create a controller, and return the controller.
-<details class="note">
+
+Creates a complete controller template.
+
+<details>
 <summary>Snippet</summary>
 
 ```json
 "Knit Controller": {
-	"prefix": ["knitcontroller"],
-	"body": [
-		"local Knit = require(ReplicatedStorage.Packages.Knit)",
-		"",
-		"local ${0:$TM_FILENAME_BASE} = { Name = \"${0:$TM_FILENAME_BASE}\" }",
-		"",
-		"",
-		"function ${0:$TM_FILENAME_BASE}:KnitStart()",
-		"\t",
-		"end",
-		"",
-		"",
-		"function ${0:$TM_FILENAME_BASE}:KnitInit()",
-		"\t",
-		"end",
-		"",
-		"",
-		"return ${0:$TM_FILENAME_BASE}",
-		""
-	],
-	"description": "Knit Controller template"
+    "prefix": ["knitcontroller"],
+    "body": [
+        "local Knit = require(ReplicatedStorage.Packages.Knit)",
+        "",
+        "local ${0:$TM_FILENAME_BASE} = { Name = \"${0:$TM_FILENAME_BASE}\" }",
+        "",
+        "",
+        "function ${0:$TM_FILENAME_BASE}:KnitStart()",
+        "\t",
+        "end",
+        "",
+        "",
+        "function ${0:$TM_FILENAME_BASE}:KnitInit()",
+        "\t",
+        "end",
+        "",
+        "",
+        "return ${0:$TM_FILENAME_BASE}",
+        ""
+    ],
+    "description": "Knit Controller template"
 }
 ```
 
 </details>
-<details class="success">
-<summary>Code Result</summary>
+<details>
+<summary>Output</summary>
 
 ```lua
 local Knit = require(ReplicatedStorage.Packages.Knit)
 
 local MyController = {
-	Name = "MyController",
+    Name = "MyController",
 }
 
 function MyController:KnitStart()
@@ -186,24 +190,26 @@ return MyController
 
 </details>
 
--------------------------------------
+---
 
-### Knit Require
-Require a module within Knit.
-<details class="note">
+### Knit Module Require
+
+Requires a module from within Knit's utility folder.
+
+<details>
 <summary>Snippet</summary>
 
 ```json
 "Knit Require": {
-	"prefix": ["knitrequire"],
-	"body": ["local ${1:Name} = require(Knit.${2:Util}.${1:Name})"],
-	"description": "Knit Require template"
+    "prefix": ["knitrequire"],
+    "body": ["local ${1:Name} = require(Knit.${2:Util}.${1:Name})"],
+    "description": "Knit Require template"
 }
 ```
 
 </details>
-<details class="success">
-<summary>Code Result</summary>
+<details>
+<summary>Output</summary>
 
 ```lua
 local Signal = require(Knit.Util.Signal)
@@ -211,51 +217,52 @@ local Signal = require(Knit.Util.Signal)
 
 </details>
 
--------------------------------------
+---
 
 ### Lua Class
-A standard Lua class.
 
-<details class="note">
+A standard Lua class template (not Knit-specific).
+
+<details>
 <summary>Snippet</summary>
 
 ```json
 "Class": {
-	"prefix": ["class"],
-	"body": [
-		"local ${0:$TM_FILENAME_BASE} = {}",
-		"${0:$TM_FILENAME_BASE}.__index = ${0:$TM_FILENAME_BASE}",
-		"",
-		"",
-		"function ${0:$TM_FILENAME_BASE}.new()",
-		"\tlocal self = setmetatable({}, ${0:$TM_FILENAME_BASE})",
-		"\treturn self",
-		"end",
-		"",
-		"",
-		"function ${0:$TM_FILENAME_BASE}:Destroy()",
-		"\t",
-		"end",
-		"",
-		"",
-		"return ${0:$TM_FILENAME_BASE}",
-		""
-	],
-	"description": "Lua Class"
+    "prefix": ["class"],
+    "body": [
+        "local ${0:$TM_FILENAME_BASE} = {}",
+        "${0:$TM_FILENAME_BASE}.__index = ${0:$TM_FILENAME_BASE}",
+        "",
+        "",
+        "function ${0:$TM_FILENAME_BASE}.new()",
+        "\tlocal self = setmetatable({}, ${0:$TM_FILENAME_BASE})",
+        "\treturn self",
+        "end",
+        "",
+        "",
+        "function ${0:$TM_FILENAME_BASE}:Destroy()",
+        "\t",
+        "end",
+        "",
+        "",
+        "return ${0:$TM_FILENAME_BASE}",
+        ""
+    ],
+    "description": "Lua Class"
 }
 ```
 
 </details>
-<details class="success">
-<summary>Code Result</summary>
+<details>
+<summary>Output</summary>
 
 ```lua
 local MyClass = {}
 MyClass.__index = MyClass
 
 function MyClass.new()
-	local self = setmetatable({}, MyClass)
-	return self
+    local self = setmetatable({}, MyClass)
+    return self
 end
 
 function MyClass:Destroy()
@@ -267,109 +274,108 @@ return MyClass
 
 </details>
 
--------------------------------------
+---
 
-### All
-All the above snippets together.
+## All Snippets Combined
 
-<details class="note">
-<summary>All Snippets</summary>
+<details>
+<summary>Complete lua.json</summary>
 
 ```json
 {
 
-	"Service": {
-		"prefix": ["service"],
-		"body": ["local ${0:Name}Service = game:GetService(\"${0:Name}Service\")"],
-		"description": "Roblox Service"
-	},
+    "Service": {
+        "prefix": ["service"],
+        "body": ["local ${0:Name}Service = game:GetService(\"${0:Name}Service\")"],
+        "description": "Roblox Service"
+    },
 
-	"Class": {
-		"prefix": ["class"],
-		"body": [
-			"local ${0:$TM_FILENAME_BASE} = {}",
-			"${0:$TM_FILENAME_BASE}.__index = ${0:$TM_FILENAME_BASE}",
-			"",
-			"",
-			"function ${0:$TM_FILENAME_BASE}.new()",
-			"\tlocal self = setmetatable({}, ${0:$TM_FILENAME_BASE})",
-			"\treturn self",
-			"end",
-			"",
-			"",
-			"function ${0:$TM_FILENAME_BASE}:Destroy()",
-			"\t",
-			"end",
-			"",
-			"",
-			"return ${0:$TM_FILENAME_BASE}",
-			""
-		],
-		"description": "Lua Class"
-	},
+    "Class": {
+        "prefix": ["class"],
+        "body": [
+            "local ${0:$TM_FILENAME_BASE} = {}",
+            "${0:$TM_FILENAME_BASE}.__index = ${0:$TM_FILENAME_BASE}",
+            "",
+            "",
+            "function ${0:$TM_FILENAME_BASE}.new()",
+            "\tlocal self = setmetatable({}, ${0:$TM_FILENAME_BASE})",
+            "\treturn self",
+            "end",
+            "",
+            "",
+            "function ${0:$TM_FILENAME_BASE}:Destroy()",
+            "\t",
+            "end",
+            "",
+            "",
+            "return ${0:$TM_FILENAME_BASE}",
+            ""
+        ],
+        "description": "Lua Class"
+    },
 
-	"Knit": {
-		"prefix": ["knit"],
-		"body": ["local Knit = require(ReplicatedStorage.Packages.Knit)"],
-		"description": "Require the Knit module"
-	},
+    "Knit": {
+        "prefix": ["knit"],
+        "body": ["local Knit = require(ReplicatedStorage.Packages.Knit)"],
+        "description": "Require the Knit module"
+    },
 
-	"Knit Service": {
-		"prefix": ["knitservice"],
-		"body": [
-			"local Knit = require(ReplicatedStorage.Packages.Knit)",
-			"",
-			"local ${0:$TM_FILENAME_BASE} = {",
-			"\tName = \"${0:$TM_FILENAME_BASE}\",",
-			"\tClient = {},",
-			"}",
-			"",
-			"",
-			"function ${0:$TM_FILENAME_BASE}:KnitStart()",
-			"\t",
-			"end",
-			"",
-			"",
-			"function ${0:$TM_FILENAME_BASE}:KnitInit()",
-			"\t",
-			"end",
-			"",
-			"",
-			"return ${0:$TM_FILENAME_BASE}",
-			""
-		],
-		"description": "Knit Service template"
-	},
+    "Knit Service": {
+        "prefix": ["knitservice"],
+        "body": [
+            "local Knit = require(ReplicatedStorage.Packages.Knit)",
+            "",
+            "local ${0:$TM_FILENAME_BASE} = {",
+            "\tName = \"${0:$TM_FILENAME_BASE}\",",
+            "\tClient = {},",
+            "}",
+            "",
+            "",
+            "function ${0:$TM_FILENAME_BASE}:KnitStart()",
+            "\t",
+            "end",
+            "",
+            "",
+            "function ${0:$TM_FILENAME_BASE}:KnitInit()",
+            "\t",
+            "end",
+            "",
+            "",
+            "return ${0:$TM_FILENAME_BASE}",
+            ""
+        ],
+        "description": "Knit Service template"
+    },
 
-	"Knit Controller": {
-		"prefix": ["knitcontroller"],
-		"body": [
-			"local Knit = require(ReplicatedStorage.Packages.Knit)",
-			"",
-			"local ${0:$TM_FILENAME_BASE} = { Name = \"${0:$TM_FILENAME_BASE}\" }",
-			"",
-			"",
-			"function ${0:$TM_FILENAME_BASE}:KnitStart()",
-			"\t",
-			"end",
-			"",
-			"",
-			"function ${0:$TM_FILENAME_BASE}:KnitInit()",
-			"\t",
-			"end",
-			"",
-			"",
-			"return ${0:$TM_FILENAME_BASE}",
-			""
-		],
-		"description": "Knit Controller template"
-	},
+    "Knit Controller": {
+        "prefix": ["knitcontroller"],
+        "body": [
+            "local Knit = require(ReplicatedStorage.Packages.Knit)",
+            "",
+            "local ${0:$TM_FILENAME_BASE} = { Name = \"${0:$TM_FILENAME_BASE}\" }",
+            "",
+            "",
+            "function ${0:$TM_FILENAME_BASE}:KnitStart()",
+            "\t",
+            "end",
+            "",
+            "",
+            "function ${0:$TM_FILENAME_BASE}:KnitInit()",
+            "\t",
+            "end",
+            "",
+            "",
+            "return ${0:$TM_FILENAME_BASE}",
+            ""
+        ],
+        "description": "Knit Controller template"
+    },
 
-	"Knit Require": {
-		"prefix": ["knitrequire"],
-		"body": ["local ${1:Name} = require(Knit.${2:Util}.${1:Name})"],
-		"description": "Knit Require template"
-	}
+    "Knit Require": {
+        "prefix": ["knitrequire"],
+        "body": ["local ${1:Name} = require(Knit.${2:Util}.${1:Name})"],
+        "description": "Knit Require template"
+    }
 
 }
 ```
