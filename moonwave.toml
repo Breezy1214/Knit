@@ -1,4 +1,5 @@
 gitRepoUrl = "https://github.com/Breezy1214/Knit"
+gitSourceBranch = "main"
 
 classOrder = [
 	"KnitServer",
@@ -12,3 +13,4 @@ includeReadme = false
 [docusaurus]
 tagline = "Lightweight game framework for Roblox"
 favicon = "/favicon.png"
+baseUrl = "/Knit/"
