@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[7049],{84410:e=>{e.exports=JSON.parse('{"sourceUrl":"https://github.com/Breezy1214/Knit/blob/main","baseUrl":"/Knit/","classOrder":["KnitServer","KnitClient"],"apiCategories":[]}')}}]);
