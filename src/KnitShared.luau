@@ -191,7 +191,19 @@ local function safeCallOnStartError(onStartErrorFn: ((string, any) -> ())?, item
 	end
 end
 
-function KnitShared.runKnitInitSequential(orderedItems: { any })
+function KnitShared.runKnitInitSequential(
+	orderedItems: { any },
+	itemKind: string,
+	onStartErrorFn: ((string, any) -> ())?
+)
+	local function reportInitError(itemName: string, err: any)
+		if onStartErrorFn then
+			safeCallOnStartError(onStartErrorFn, itemName, err)
+		else
+			warn(`[Knit]: KnitInit errored for {itemKind} "{itemName}"; Knit will not finish starting:\n{err}`)
+		end
+	end
+
 	return Promise.new(function(resolve, reject)
 		local index = 1
 
@@ -215,12 +227,16 @@ function KnitShared.runKnitInitSequential(orderedItems: { any })
 			end, debug.traceback)
 
 			if not ok then
+				reportInitError(item.Name, result)
 				reject(result)
 				return
 			end
 
 			if KnitShared.isPromiseLike(result) then
-				result:andThen(runNext):catch(reject)
+				result:andThen(runNext):catch(function(err)
+					reportInitError(item.Name, err)
+					reject(err)
+				end)
 			else
 				runNext()
 			end

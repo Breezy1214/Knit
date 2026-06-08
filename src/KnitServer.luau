@@ -396,7 +396,7 @@ function KnitServer.Start(options: KnitServerOptions?)
 			end
 		end
 
-		resolve(KnitShared.runKnitInitSequential(orderedServices))
+		resolve(KnitShared.runKnitInitSequential(orderedServices, "service", selectedOptions.OnStartError))
 	end)
 		:andThen(function()
 			-- Start:

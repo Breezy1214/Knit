@@ -336,7 +336,7 @@ function KnitClient.Start(options: KnitClientOptions?)
 
 	local orderedControllers = KnitShared.resolveDependencyOrder(controllerOrder, controllers, "controller")
 
-	return KnitShared.runKnitInitSequential(orderedControllers)
+	return KnitShared.runKnitInitSequential(orderedControllers, "controller", selectedOptions.OnStartError)
 		:andThen(function()
 			-- Start:
 			if selectedOptions.DeterministicStart then
