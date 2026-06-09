@@ -27,6 +27,22 @@ function KnitShared.validateStartOptions(options: { DeterministicStart: boolean?
 	end
 end
 
+function KnitShared.resolveStartOptions(options: any, defaultOptions: any): any
+	if options == nil then
+		return defaultOptions
+	end
+
+	assert(typeof(options) == "table", `KnitOptions should be a table or nil; got {typeof(options)}`)
+
+	for key, value in defaultOptions do
+		if options[key] == nil then
+			options[key] = value
+		end
+	end
+
+	return options
+end
+
 function KnitShared.validateMiddleware(middleware: any, context: string)
 	if middleware == nil then
 		return
@@ -180,14 +196,19 @@ function KnitShared.resolveDependencyOrder(
 	return resolved
 end
 
-local function safeCallOnStartError(onStartErrorFn: ((string, any) -> ())?, itemName: string, err: any)
-	if onStartErrorFn == nil then
-		return
-	end
-
-	local ok, callbackErr = pcall(onStartErrorFn, itemName, err)
-	if not ok then
-		warn(`Knit OnStartError callback failed for "{itemName}": {callbackErr}`)
+local function reportStartError(
+	onStartErrorFn: ((string, any) -> ())?,
+	itemName: string,
+	err: any,
+	fallbackWarning: string?
+)
+	if onStartErrorFn then
+		local ok, callbackErr = pcall(onStartErrorFn, itemName, err)
+		if not ok then
+			warn(`Knit OnStartError callback failed for "{itemName}": {callbackErr}`)
+		end
+	elseif fallbackWarning then
+		warn(fallbackWarning)
 	end
 end
 
@@ -196,15 +217,17 @@ function KnitShared.runKnitInitSequential(
 	itemKind: string,
 	onStartErrorFn: ((string, any) -> ())?
 )
-	local function reportInitError(itemName: string, err: any)
-		if onStartErrorFn then
-			safeCallOnStartError(onStartErrorFn, itemName, err)
-		else
-			warn(`[Knit]: KnitInit errored for {itemKind} "{itemName}"; Knit will not finish starting:\n{err}`)
-		end
-	end
-
 	return Promise.new(function(resolve, reject)
+		local function failInit(itemName: string, err: any)
+			reportStartError(
+				onStartErrorFn,
+				itemName,
+				err,
+				`[Knit]: KnitInit errored for {itemKind} "{itemName}"; Knit will not finish starting:\n{err}`
+			)
+			reject(err)
+		end
+
 		local index = 1
 
 		local function runNext()
@@ -227,15 +250,13 @@ function KnitShared.runKnitInitSequential(
 			end, debug.traceback)
 
 			if not ok then
-				reportInitError(item.Name, result)
-				reject(result)
+				failInit(item.Name, result)
 				return
 			end
 
 			if KnitShared.isPromiseLike(result) then
 				result:andThen(runNext):catch(function(err)
-					reportInitError(item.Name, err)
-					reject(err)
+					failInit(item.Name, err)
 				end)
 			else
 				runNext()
@@ -286,7 +307,7 @@ function KnitShared.runKnitStartTracked(
 				end, debug.traceback)
 
 				if not ok then
-					safeCallOnStartError(onStartErrorFn, item.Name, result)
+					reportStartError(onStartErrorFn, item.Name, result)
 					table.insert(failures, { Name = item.Name, Error = result })
 					completeOne()
 					return
@@ -298,7 +319,7 @@ function KnitShared.runKnitStartTracked(
 							completeOne()
 						end)
 						:catch(function(err)
-							safeCallOnStartError(onStartErrorFn, item.Name, err)
+							reportStartError(onStartErrorFn, item.Name, err)
 							table.insert(failures, { Name = item.Name, Error = err })
 							completeOne()
 						end)
@@ -330,13 +351,13 @@ function KnitShared.runKnitStartFireAndForget(
 			end, debug.traceback)
 
 			if not ok then
-				safeCallOnStartError(onStartErrorFn, item.Name, result)
+				reportStartError(onStartErrorFn, item.Name, result)
 				return
 			end
 
 			if KnitShared.isPromiseLike(result) then
 				result:catch(function(err)
-					safeCallOnStartError(onStartErrorFn, item.Name, err)
+					reportStartError(onStartErrorFn, item.Name, err)
 				end)
 			end
 		end)

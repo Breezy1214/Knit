@@ -353,17 +353,7 @@ function KnitServer.Start(options: KnitServerOptions?)
 	table.freeze(services)
 	table.freeze(serviceOrder)
 
-	if options == nil then
-		selectedOptions = defaultOptions
-	else
-		assert(typeof(options) == "table", `KnitOptions should be a table or nil; got {typeof(options)}`)
-		selectedOptions = options
-		for k, v in defaultOptions do
-			if selectedOptions[k] == nil then
-				selectedOptions[k] = v
-			end
-		end
-	end
+	selectedOptions = KnitShared.resolveStartOptions(options, defaultOptions)
 
 	KnitShared.validateStartOptions(selectedOptions)
 	KnitShared.validateMiddleware(selectedOptions.Middleware, "KnitOptions.Middleware")

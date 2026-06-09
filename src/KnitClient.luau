@@ -307,17 +307,8 @@ function KnitClient.Start(options: KnitClientOptions?)
 	table.freeze(controllers)
 	table.freeze(controllerOrder)
 
-	if options == nil then
-		selectedOptions = defaultOptions
-	else
-		assert(typeof(options) == "table", `KnitOptions should be a table or nil; got {typeof(options)}`)
-		selectedOptions = options
-		for k, v in defaultOptions do
-			if selectedOptions[k] == nil then
-				selectedOptions[k] = v
-			end
-		end
-	end
+	selectedOptions = KnitShared.resolveStartOptions(options, defaultOptions)
+
 	if type(selectedOptions.PerServiceMiddleware) ~= "table" then
 		selectedOptions.PerServiceMiddleware = {}
 	end
