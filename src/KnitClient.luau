@@ -106,37 +106,6 @@ local function createController(controllerDef: ControllerDef): Controller
 	return controller
 end
 
-local function addControllerFromModule(moduleScript: ModuleScript): Controller
-	local controllerDef: ControllerDef = require(moduleScript) :: any
-
-	-- Legacy modules register themselves via Knit.CreateController and return
-	-- the result; reuse that controller instead of erroring on the duplicate name.
-	if
-		type(controllerDef) == "table"
-		and type(controllerDef.Name) == "string"
-		and controllers[controllerDef.Name] == controllerDef
-	then
-		return controllerDef :: any
-	end
-
-	return createController(controllerDef)
-end
-
---[=[
-	Registers a controller from a controller definition table and returns it.
-	Kept for compatibility with legacy Knit code; controllers can also be
-	plain tables returned from ModuleScripts loaded via `AddControllers`.
-
-	```lua
-	local CameraController = Knit.CreateController({
-		Name = "CameraController",
-	})
-	```
-]=]
-function KnitClient.CreateController(controllerDef: ControllerDef): Controller
-	return createController(controllerDef)
-end
-
 --[=[
 	Requires all the modules that are children of the given parent. This is an easy
 	way to quickly load all controllers that might be in a folder.
@@ -157,7 +126,9 @@ function KnitClient.AddControllers(parent: Instance, predicate: ((ModuleScript) 
 			continue
 		end
 
-		table.insert(addedControllers, addControllerFromModule(v))
+		local controllerDef: ControllerDef = require(v)
+		local controller: Controller = createController(controllerDef)
+		table.insert(addedControllers, controller)
 	end
 
 	return addedControllers
@@ -208,7 +179,9 @@ function KnitClient.AddControllersDeep(
 					continue
 				end
 
-				table.insert(addedControllers, addControllerFromModule(child))
+				local controllerDef: ControllerDef = require(child)
+				local controller: Controller = createController(controllerDef)
+				table.insert(addedControllers, controller)
 			elseif not KnitShared.shouldIgnoreFolder(child, ignoreFolderPatterns) then
 				walk(child, depth + 1, childPath)
 			end

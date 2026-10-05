@@ -108,38 +108,6 @@ local function createService(serviceDef: ServiceDef): Service
 	return service
 end
 
-local function addServiceFromModule(moduleScript: ModuleScript): Service
-	local serviceDef: ServiceDef = require(moduleScript) :: any
-
-	-- Legacy modules register themselves via Knit.CreateService and return the
-	-- result; reuse that service instead of erroring on the duplicate name.
-	if
-		type(serviceDef) == "table"
-		and type(serviceDef.Name) == "string"
-		and services[serviceDef.Name] == serviceDef
-	then
-		return serviceDef :: any
-	end
-
-	return createService(serviceDef)
-end
-
---[=[
-	Registers a service from a service definition table and returns it.
-	Kept for compatibility with legacy Knit code; services can also be
-	plain tables returned from ModuleScripts loaded via `AddServices`.
-
-	```lua
-	local MoneyService = Knit.CreateService({
-		Name = "MoneyService",
-		Client = {},
-	})
-	```
-]=]
-function KnitServer.CreateService(serviceDef: ServiceDef): Service
-	return createService(serviceDef)
-end
-
 --[=[
 	Requires all the modules that are children of the given parent. This is an easy
 	way to quickly load all services that might be in a folder.
@@ -160,7 +128,9 @@ function KnitServer.AddServices(parent: Instance, predicate: ((ModuleScript) -> 
 			continue
 		end
 
-		table.insert(addedServices, addServiceFromModule(v))
+		local serviceDef: ServiceDef = require(v)
+		local service: Service = createService(serviceDef)
+		table.insert(addedServices, service)
 	end
 
 	return addedServices
@@ -221,7 +191,9 @@ function KnitServer.AddServicesDeep(
 					continue
 				end
 
-				table.insert(addedServices, addServiceFromModule(child))
+				local serviceDef: ServiceDef = require(child)
+				local service: Service = createService(serviceDef)
+				table.insert(addedServices, service)
 			elseif not KnitShared.shouldIgnoreFolder(child, ignoreFolderPatterns) then
 				walk(child, depth + 1, childPath)
 			end

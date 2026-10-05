@@ -300,13 +300,15 @@ See the [Middleware](docs/middleware.md) documentation for per-service middlewar
 
 ### Service/Controller Creation
 
+`Knit.CreateService` and `Knit.CreateController` have been removed. Return a plain table from the module instead and load it with `AddServices` or `AddControllers`:
+
 ```lua
--- Legacy (still supported)
+-- Legacy (removed)
 local MoneyService = Knit.CreateService({
     Name = "MoneyService",
 })
 
--- Current (recommended)
+-- Current
 local MoneyService = {
     Name = "MoneyService",
 }
