@@ -96,7 +96,7 @@ local function createController(controllerDef: ControllerDef): Controller
 	assert(type(controllerDef) == "table", `Controller must be a table; got {type(controllerDef)}`)
 	assert(type(controllerDef.Name) == "string", `Controller.Name must be a string; got {type(controllerDef.Name)}`)
 	assert(#controllerDef.Name > 0, "Controller.Name must be a non-empty string")
-	assert(not DoesControllerExist(controllerDef.Name), `Controller {controllerDef.Name} already exists`)
+	assert(not DoesControllerExist(controllerDef.Name), `Controller "{controllerDef.Name}" already exists`)
 	assert(not started, `Controllers cannot be created after calling "Knit.Start()"`)
 
 	local controller = controllerDef :: Controller
@@ -104,6 +104,37 @@ local function createController(controllerDef: ControllerDef): Controller
 	table.insert(controllerOrder, controller)
 
 	return controller
+end
+
+local function addControllerFromModule(moduleScript: ModuleScript): Controller
+	local controllerDef: ControllerDef = require(moduleScript) :: any
+
+	-- Legacy modules register themselves via Knit.CreateController and return
+	-- the result; reuse that controller instead of erroring on the duplicate name.
+	if
+		type(controllerDef) == "table"
+		and type(controllerDef.Name) == "string"
+		and controllers[controllerDef.Name] == controllerDef
+	then
+		return controllerDef :: any
+	end
+
+	return createController(controllerDef)
+end
+
+--[=[
+	Registers a controller from a controller definition table and returns it.
+	Kept for compatibility with legacy Knit code; controllers can also be
+	plain tables returned from ModuleScripts loaded via `AddControllers`.
+
+	```lua
+	local CameraController = Knit.CreateController({
+		Name = "CameraController",
+	})
+	```
+]=]
+function KnitClient.CreateController(controllerDef: ControllerDef): Controller
+	return createController(controllerDef)
 end
 
 --[=[
@@ -126,9 +157,7 @@ function KnitClient.AddControllers(parent: Instance, predicate: ((ModuleScript) 
 			continue
 		end
 
-		local controllerDef: ControllerDef = require(v)
-		local controller: Controller = createController(controllerDef)
-		table.insert(addedControllers, controller)
+		table.insert(addedControllers, addControllerFromModule(v))
 	end
 
 	return addedControllers
@@ -157,7 +186,8 @@ function KnitClient.AddControllersDeep(
 ): { Controller }
 	assert(not started, `Controllers cannot be added after calling "Knit.Start()"`)
 
-	local predicate, deepSearchOptions = KnitShared.parseDeepSearchArgs(predicateOrOptions, options, "AddControllersDeep")
+	local predicate, deepSearchOptions =
+		KnitShared.parseDeepSearchArgs(predicateOrOptions, options, "AddControllersDeep")
 	local maxDepth = if deepSearchOptions and deepSearchOptions.MaxDepth then deepSearchOptions.MaxDepth else math.huge
 	local ignoreFolderPatterns = if deepSearchOptions and deepSearchOptions.IgnoreFolderPatterns
 		then deepSearchOptions.IgnoreFolderPatterns
@@ -178,9 +208,7 @@ function KnitClient.AddControllersDeep(
 					continue
 				end
 
-				local controllerDef: ControllerDef = require(child)
-				local controller: Controller = createController(controllerDef)
-				table.insert(addedControllers, controller)
+				table.insert(addedControllers, addControllerFromModule(child))
 			elseif not KnitShared.shouldIgnoreFolder(child, ignoreFolderPatterns) then
 				walk(child, depth + 1, childPath)
 			end
@@ -302,16 +330,22 @@ function KnitClient.Start(options: KnitClientOptions?)
 		return Promise.reject("Knit already started")
 	end
 
-	started = true
-
-	table.freeze(controllers)
-	table.freeze(controllerOrder)
-
+	-- Validate everything up front so a bad call doesn't leave Knit
+	-- half-started and unable to be started again:
 	selectedOptions = KnitShared.resolveStartOptions(options, defaultOptions)
 
-	if type(selectedOptions.PerServiceMiddleware) ~= "table" then
+	if selectedOptions.PerServiceMiddleware == nil then
 		selectedOptions.PerServiceMiddleware = {}
 	end
+
+	assert(
+		type(selectedOptions.ServicePromises) == "boolean",
+		`KnitOptions.ServicePromises must be a boolean if provided; got {type(selectedOptions.ServicePromises)}`
+	)
+	assert(
+		type(selectedOptions.PerServiceMiddleware) == "table",
+		`KnitOptions.PerServiceMiddleware must be a table if provided; got {type(selectedOptions.PerServiceMiddleware)}`
+	)
 
 	KnitShared.validateStartOptions(selectedOptions)
 
@@ -327,13 +361,18 @@ function KnitClient.Start(options: KnitClientOptions?)
 
 	local orderedControllers = KnitShared.resolveDependencyOrder(controllerOrder, controllers, "controller")
 
+	started = true
+
+	table.freeze(controllers)
+	table.freeze(controllerOrder)
+
 	return KnitShared.runKnitInitSequential(orderedControllers, "controller", selectedOptions.OnStartError)
 		:andThen(function()
 			-- Start:
 			if selectedOptions.DeterministicStart then
 				return KnitShared.runKnitStartTracked(orderedControllers, "controller", selectedOptions.OnStartError)
 			else
-				KnitShared.runKnitStartFireAndForget(orderedControllers, selectedOptions.OnStartError)
+				KnitShared.runKnitStartFireAndForget(orderedControllers, "controller", selectedOptions.OnStartError)
 				return Promise.resolve()
 			end
 		end)

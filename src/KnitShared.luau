@@ -11,7 +11,10 @@ function KnitShared.isPromiseLike(value: any): boolean
 	return type(value) == "table" and type(value.andThen) == "function" and type(value.catch) == "function"
 end
 
-function KnitShared.validateStartOptions(options: { DeterministicStart: boolean?, OnStartError: ((name: string, err: any) -> ())? })
+function KnitShared.validateStartOptions(options: {
+	DeterministicStart: boolean?,
+	OnStartError: ((name: string, err: any) -> ())?,
+})
 	if options.DeterministicStart ~= nil then
 		assert(
 			type(options.DeterministicStart) == "boolean",
@@ -29,18 +32,20 @@ end
 
 function KnitShared.resolveStartOptions(options: any, defaultOptions: any): any
 	if options == nil then
-		return defaultOptions
+		return table.clone(defaultOptions)
 	end
 
 	assert(typeof(options) == "table", `KnitOptions should be a table or nil; got {typeof(options)}`)
 
+	-- Copy so the caller's table is never mutated:
+	local resolved = table.clone(options)
 	for key, value in defaultOptions do
-		if options[key] == nil then
-			options[key] = value
+		if resolved[key] == nil then
+			resolved[key] = value
 		end
 	end
 
-	return options
+	return resolved
 end
 
 function KnitShared.validateMiddleware(middleware: any, context: string)
@@ -110,7 +115,10 @@ function KnitShared.parseDeepSearchArgs(
 
 	if type(predicateOrOptions) == "function" then
 		predicate = predicateOrOptions
-	elseif type(predicateOrOptions) == "table" and options == nil then
+	elseif type(predicateOrOptions) == "table" then
+		if options ~= nil then
+			error(`{contextName} received two options tables; pass options as the second argument only`, 3)
+		end
 		resolvedOptions = predicateOrOptions
 	elseif predicateOrOptions ~= nil then
 		error(
@@ -140,11 +148,7 @@ function KnitShared.shouldIgnoreFolder(instance: Instance, ignoreFolderPatterns:
 	return false
 end
 
-function KnitShared.resolveDependencyOrder(
-	items: { any },
-	lookup: { [string]: any },
-	itemKind: string
-): { any }
+function KnitShared.resolveDependencyOrder(items: { any }, lookup: { [string]: any }, itemKind: string): { any }
 	local resolved = {}
 	local state: { [string]: string } = {}
 
@@ -166,21 +170,12 @@ function KnitShared.resolveDependencyOrder(
 
 		local dependsOn = item.DependsOn
 		if dependsOn ~= nil then
-			assert(
-				type(dependsOn) == "table",
-				`{itemKind} "{itemName}" DependsOn must be an array of {itemKind} names`
-			)
+			assert(type(dependsOn) == "table", `{itemKind} "{itemName}" DependsOn must be an array of {itemKind} names`)
 
 			for i, dependencyName in dependsOn do
-				assert(
-					type(dependencyName) == "string",
-					`{itemKind} "{itemName}" DependsOn[{i}] must be a string`
-				)
+				assert(type(dependencyName) == "string", `{itemKind} "{itemName}" DependsOn[{i}] must be a string`)
 				local dependency = lookup[dependencyName]
-				assert(
-					dependency ~= nil,
-					`{itemKind} "{itemName}" depends on unknown {itemKind} "{dependencyName}"`
-				)
+				assert(dependency ~= nil, `{itemKind} "{itemName}" depends on unknown {itemKind} "{dependencyName}"`)
 				visit(dependency, table.clone(stack))
 			end
 		end
@@ -212,6 +207,16 @@ local function reportStartError(
 	end
 end
 
+local function callLifecycleMethod(item: any, methodName: string): (boolean, any)
+	debug.setmemorycategory(item.Name)
+	local ok, result = xpcall(function()
+		return item[methodName](item)
+	end, debug.traceback)
+	debug.resetmemorycategory()
+
+	return ok, result
+end
+
 function KnitShared.runKnitInitSequential(
 	orderedItems: { any },
 	itemKind: string,
@@ -228,52 +233,60 @@ function KnitShared.runKnitInitSequential(
 			reject(err)
 		end
 
-		local index = 1
+		local index = 0
 
-		local function runNext()
-			local item = orderedItems[index]
-			if item == nil then
-				resolve()
-				return
-			end
+		local function runFrom()
+			-- Iterate synchronous inits in a loop; only hop to a continuation when
+			-- an init returns a promise, so long chains don't deepen the stack.
+			while true do
+				index += 1
+				local item = orderedItems[index]
+				if item == nil then
+					resolve()
+					return
+				end
 
-			index += 1
+				if type(item.KnitInit) ~= "function" then
+					continue
+				end
 
-			if type(item.KnitInit) ~= "function" then
-				runNext()
-				return
-			end
+				local ok, result = callLifecycleMethod(item, "KnitInit")
 
-			debug.setmemorycategory(item.Name)
-			local ok, result = xpcall(function()
-				return item:KnitInit()
-			end, debug.traceback)
+				if not ok then
+					failInit(item.Name, result)
+					return
+				end
 
-			if not ok then
-				failInit(item.Name, result)
-				return
-			end
-
-			if KnitShared.isPromiseLike(result) then
-				result:andThen(runNext):catch(function(err)
-					failInit(item.Name, err)
-				end)
-			else
-				runNext()
+				if KnitShared.isPromiseLike(result) then
+					result:andThen(function()
+						runFrom()
+					end, function(err)
+						failInit(item.Name, err)
+					end)
+					return
+				end
 			end
 		end
 
-		runNext()
+		runFrom()
 	end)
 end
 
-function KnitShared.runKnitStartTracked(
-	orderedItems: { any },
-	itemKind: string,
-	onStartErrorFn: ((string, any) -> ())?
-)
+local StartFailureMeta = {}
+StartFailureMeta.__tostring = function(self): string
+	local lines = { self.Message }
+	for _, failure in self.Errors do
+		table.insert(lines, `- {failure.Name}: {failure.Error}`)
+	end
+	return table.concat(lines, "\n")
+end
+
+function KnitShared.runKnitStartTracked(orderedItems: { any }, itemKind: string, onStartErrorFn: ((string, any) -> ())?)
 	return Promise.new(function(resolve, reject)
-		local pending = 0
+		-- Starts at 1 so a KnitStart that finishes synchronously inside task.spawn
+		-- can't drop the count to zero before the remaining items are dispatched.
+		-- The extra count is released once the dispatch loop is done.
+		local pending = 1
 		local failures = {}
 
 		local function completeOne()
@@ -287,10 +300,16 @@ function KnitShared.runKnitStartTracked(
 				return
 			end
 
-			reject({
+			reject(setmetatable({
 				Message = `KnitStart failed for {#failures} {itemKind}(s)`,
 				Errors = failures,
-			})
+			}, StartFailureMeta))
+		end
+
+		local function fail(itemName: string, err: any)
+			reportStartError(onStartErrorFn, itemName, err)
+			table.insert(failures, { Name = itemName, Error = err })
+			completeOne()
 		end
 
 		for _, item in orderedItems do
@@ -301,63 +320,52 @@ function KnitShared.runKnitStartTracked(
 			pending += 1
 
 			task.spawn(function()
-				debug.setmemorycategory(item.Name)
-				local ok, result = xpcall(function()
-					return item:KnitStart()
-				end, debug.traceback)
+				local ok, result = callLifecycleMethod(item, "KnitStart")
 
 				if not ok then
-					reportStartError(onStartErrorFn, item.Name, result)
-					table.insert(failures, { Name = item.Name, Error = result })
-					completeOne()
+					fail(item.Name, result)
 					return
 				end
 
 				if KnitShared.isPromiseLike(result) then
-					result
-						:andThen(function()
-							completeOne()
-						end)
-						:catch(function(err)
-							reportStartError(onStartErrorFn, item.Name, err)
-							table.insert(failures, { Name = item.Name, Error = err })
-							completeOne()
-						end)
+					result:andThen(completeOne, function(err)
+						fail(item.Name, err)
+					end)
 				else
 					completeOne()
 				end
 			end)
 		end
 
-		if pending == 0 then
-			resolve()
-		end
+		completeOne()
 	end)
 end
 
 function KnitShared.runKnitStartFireAndForget(
 	orderedItems: { any },
+	itemKind: string,
 	onStartErrorFn: ((string, any) -> ())?
 )
+	local function fail(itemName: string, err: any)
+		reportStartError(onStartErrorFn, itemName, err, `[Knit]: KnitStart errored for {itemKind} "{itemName}":\n{err}`)
+	end
+
 	for _, item in orderedItems do
 		if type(item.KnitStart) ~= "function" then
 			continue
 		end
 
 		task.spawn(function()
-			debug.setmemorycategory(item.Name)
-			local ok, result = xpcall(function()
-				return item:KnitStart()
-			end, debug.traceback)
+			local ok, result = callLifecycleMethod(item, "KnitStart")
 
 			if not ok then
-				reportStartError(onStartErrorFn, item.Name, result)
+				fail(item.Name, result)
 				return
 			end
 
 			if KnitShared.isPromiseLike(result) then
 				result:catch(function(err)
-					reportStartError(onStartErrorFn, item.Name, err)
+					fail(item.Name, err)
 				end)
 			end
 		end)
