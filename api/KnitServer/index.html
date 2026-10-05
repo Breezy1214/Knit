@@ -30,8 +30,8 @@ Knit.Start():andThen(function()
 	print(&quot;Knit started&quot;)
 end):catch(warn)
 ```"><link data-rh="true" rel="icon" href="/Knit/favicon.png"><link data-rh="true" rel="canonical" href="https://Breezy1214.github.io/Knit/api/KnitServer"><link data-rh="true" rel="alternate" href="https://Breezy1214.github.io/Knit/api/KnitServer" hreflang="en"><link data-rh="true" rel="alternate" href="https://Breezy1214.github.io/Knit/api/KnitServer" hreflang="x-default"><link rel="stylesheet" href="/Knit/assets/css/styles.5ec48d9a.css">
-<script src="/Knit/assets/js/runtime~main.1dab4a3a.js" defer="defer"></script>
-<script src="/Knit/assets/js/main.0919f123.js" defer="defer"></script>
+<script src="/Knit/assets/js/runtime~main.145f87aa.js" defer="defer"></script>
+<script src="/Knit/assets/js/main.55ac08d6.js" defer="defer"></script>
 </head>
 <body>
 <svg style="display: none;"><defs>
@@ -56,21 +56,36 @@ Knit<span class="token punctuation">.</span><span class="token function">Start</
 <p>For more info, see <a href="https://sleitnick.github.io/RbxUtil/api/ServerComm/">ServerComm</a> documentation.</p>
 </div><div class="divider_rE5g"></div><h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="ServerMiddleware"><code style="text-decoration:none">ServerMiddleware</code><a href="#ServerMiddleware" class="hash-link" aria-label="Direct link to ServerMiddleware" title="Direct link to ServerMiddleware" translate="no">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/main/src/Types.luau#L27"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code class="purple_ieR2">type</code> <code>ServerMiddleware<!-- --> = </code> <code class="purple_ieR2">{</code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/KnitServer#ServerMiddlewareFn">ServerMiddlewareFn</a></code><code class="purple_ieR2">}</code></div><div>
 <p>An array of server middleware functions.</p>
-</div><div class="divider_rE5g"></div><h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="ServiceDef"><code style="text-decoration:none">ServiceDef</code><a href="#ServiceDef" class="hash-link" aria-label="Direct link to ServiceDef" title="Direct link to ServiceDef" translate="no">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/main/src/Types.luau#L42"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code class="purple_ieR2">interface</code> <code>ServiceDef<!-- --> <!-- -->{</code><div class="inset_uKQm"><div><code>Name<!-- -->: </code><code class="blue_P4bS">string</code></div><div><code>Client<!-- -->: </code><code class="blue_P4bS">table?</code></div><div><code>Middleware<!-- -->: </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/KnitServer#Middleware">Middleware?</a></code></div><div><code>[any]<!-- -->: </code><code class="blue_P4bS">any</code></div></div><code>}</code></div><div>
+</div><div class="divider_rE5g"></div><h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="ServiceDef"><code style="text-decoration:none">ServiceDef</code><a href="#ServiceDef" class="hash-link" aria-label="Direct link to ServiceDef" title="Direct link to ServiceDef" translate="no">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/main/src/Types.luau#L46"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code class="purple_ieR2">interface</code> <code>ServiceDef<!-- --> <!-- -->{</code><div class="inset_uKQm"><div><code>Name<!-- -->: </code><code class="blue_P4bS">string</code></div><div><code>Client<!-- -->: </code><code class="blue_P4bS">table?</code></div><div><code>Middleware<!-- -->: </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/KnitServer#Middleware">Middleware?</a></code></div><div><code>DependsOn<!-- -->: </code><code class="purple_ieR2">{</code><code class="blue_P4bS">string</code><code class="purple_ieR2">}</code><code class="blue_P4bS">?</code></div><div><code>[any]<!-- -->: </code><code class="blue_P4bS">any</code></div></div><code>}</code></div><div>
 <p>Used to define a service when creating it.</p>
+<p>
+  <code>DependsOn</code> lists the names of services whose <code>KnitInit</code> must run
+  before this service's <code>KnitInit</code>.
+</p>
 <p>
   The middleware tables provided will be used instead of the Knit-level
   middleware (if any). This allows fine-tuning each service's middleware.
   These can also be left out or <code>nil</code> to not include middleware.
 </p>
-</div><div class="divider_rE5g"></div><h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="Service"><code style="text-decoration:none">Service</code><a href="#Service" class="hash-link" aria-label="Direct link to Service" title="Direct link to Service" translate="no">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/main/src/Types.luau#L58"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code class="purple_ieR2">interface</code> <code>Service<!-- --> <!-- -->{</code><div class="inset_uKQm"><div><code>Name<!-- -->: </code><code class="blue_P4bS">string</code></div><div><code>Client<!-- -->: </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/KnitServer#ServiceClient">ServiceClient</a></code></div><div><code>KnitComm<!-- -->: </code><code class="blue_P4bS">Comm</code></div><div><code>[any]<!-- -->: </code><code class="blue_P4bS">any</code></div></div><code>}</code></div><div></div><div class="divider_rE5g"></div><h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="ServiceClient"><code style="text-decoration:none">ServiceClient</code><a href="#ServiceClient" class="hash-link" aria-label="Direct link to ServiceClient" title="Direct link to ServiceClient" translate="no">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/main/src/Types.luau#L71"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code class="purple_ieR2">interface</code> <code>ServiceClient<!-- --> <!-- -->{</code><div class="inset_uKQm"><div><code>Server<!-- -->: </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/KnitServer#Service">Service</a></code></div><div><code>[any]<!-- -->: </code><code class="blue_P4bS">any</code></div></div><code>}</code></div><div></div><div class="divider_rE5g"></div><h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="KnitOptions"><code style="text-decoration:none">KnitOptions</code><a href="#KnitOptions" class="hash-link" aria-label="Direct link to KnitOptions" title="Direct link to KnitOptions" translate="no">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/main/src/Types.luau#L84"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code class="purple_ieR2">interface</code> <code>KnitOptions<!-- --> <!-- -->{</code><div class="inset_uKQm"><div><code>Middleware<!-- -->: </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/KnitServer#Middleware">Middleware?</a></code></div></div><code>}</code></div><div>
+</div><div class="divider_rE5g"></div><h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="Service"><code style="text-decoration:none">Service</code><a href="#Service" class="hash-link" aria-label="Direct link to Service" title="Direct link to Service" translate="no">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/main/src/Types.luau#L62"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code class="purple_ieR2">interface</code> <code>Service<!-- --> <!-- -->{</code><div class="inset_uKQm"><div><code>Name<!-- -->: </code><code class="blue_P4bS">string</code></div><div><code>Client<!-- -->: </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/KnitServer#ServiceClient">ServiceClient</a></code></div><div><code>KnitComm<!-- -->: </code><code class="blue_P4bS">Comm</code></div><div><code>[any]<!-- -->: </code><code class="blue_P4bS">any</code></div></div><code>}</code></div><div></div><div class="divider_rE5g"></div><h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="ServiceClient"><code style="text-decoration:none">ServiceClient</code><a href="#ServiceClient" class="hash-link" aria-label="Direct link to ServiceClient" title="Direct link to ServiceClient" translate="no">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/main/src/Types.luau#L75"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code class="purple_ieR2">interface</code> <code>ServiceClient<!-- --> <!-- -->{</code><div class="inset_uKQm"><div><code>Server<!-- -->: </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/KnitServer#Service">Service</a></code></div><div><code>[any]<!-- -->: </code><code class="blue_P4bS">any</code></div></div><code>}</code></div><div></div><div class="divider_rE5g"></div><h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="KnitOptions"><code style="text-decoration:none">KnitOptions</code><a href="#KnitOptions" class="hash-link" aria-label="Direct link to KnitOptions" title="Direct link to KnitOptions" translate="no">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/main/src/Types.luau#L97"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code class="purple_ieR2">interface</code> <code>KnitOptions<!-- --> <!-- -->{</code><div class="inset_uKQm"><div><code>Middleware<!-- -->: </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="/Knit/api/KnitServer#Middleware">Middleware?</a></code></div><div><code>DeterministicStart<!-- -->: </code><code class="blue_P4bS">boolean?</code></div><div><code>OnStartError<!-- -->: </code><code class="purple_ieR2">(</code><code class="green_DgR4">(</code><div class="inset_uKQm"><code>name<!-- -->: </code><code class="blue_P4bS">string</code><code class="green_DgR4">,</code></div><div class="inset_uKQm"><code>err<!-- -->: </code><code class="blue_P4bS">any</code></div><code class="green_DgR4">)</code><code class="green_DgR4"> → </code><code class="green_DgR4">(</code><code class="green_DgR4">)</code><code class="purple_ieR2">)</code><code class="blue_P4bS">?</code></div></div><code>}</code></div><div>
 <ul>
   <li>
     Middleware will apply to all services <em>except</em> ones that define
     their own middleware.
   </li>
+  <li>
+    <code>DeterministicStart</code> defaults to <code>false</code>. When <code>true</code>, the promise
+    returned by <code>Start</code> waits for every <code>KnitStart</code> to finish and rejects
+    if any of them fail.
+  </li>
+  <li>
+    <code>OnStartError</code> is called with the service name and error whenever a
+    <code>KnitInit</code> or <code>KnitStart</code> fails. If omitted, failures are logged with
+    <code>warn</code> (with <code>DeterministicStart</code>, <code>KnitStart</code> failures are reported
+    through the rejected promise instead).
+  </li>
 </ul>
-</div><div class="divider_rE5g"></div><h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="DeepPredicateFn"><code style="text-decoration:none">DeepPredicateFn</code><a href="#DeepPredicateFn" class="hash-link" aria-label="Direct link to DeepPredicateFn" title="Direct link to DeepPredicateFn" translate="no">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/main/src/Types.luau#L95"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code class="purple_ieR2">type</code> <code>DeepPredicateFn<!-- --> = </code> <code class="purple_ieR2">(</code><div class="inset_uKQm"><code>moduleScript<!-- -->: </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="https://developer.roblox.com/en-us/api-reference/class/ModuleScript" target="_blank" rel="noopener noreferrer">ModuleScript<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound" style="color:gray;vertical-align:middle;margin-left:2px"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></code><code class="purple_ieR2">,</code></div><div class="inset_uKQm"><code>parent<!-- -->: </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="https://developer.roblox.com/en-us/api-reference/datatype/Instance" target="_blank" rel="noopener noreferrer">Instance<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound" style="color:gray;vertical-align:middle;margin-left:2px"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></code><code class="purple_ieR2">,</code></div><div class="inset_uKQm"><code>depth<!-- -->: </code><code class="blue_P4bS">number</code><code class="purple_ieR2">,</code></div><div class="inset_uKQm"><code>path<!-- -->: </code><code class="blue_P4bS">string</code></div><code class="purple_ieR2">)</code><code class="purple_ieR2"> → </code><code class="blue_P4bS">boolean</code></div><div>
+</div><div class="divider_rE5g"></div><h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="DeepPredicateFn"><code style="text-decoration:none">DeepPredicateFn</code><a href="#DeepPredicateFn" class="hash-link" aria-label="Direct link to DeepPredicateFn" title="Direct link to DeepPredicateFn" translate="no">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/main/src/Types.luau#L108"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code class="purple_ieR2">type</code> <code>DeepPredicateFn<!-- --> = </code> <code class="purple_ieR2">(</code><div class="inset_uKQm"><code>moduleScript<!-- -->: </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="https://developer.roblox.com/en-us/api-reference/class/ModuleScript" target="_blank" rel="noopener noreferrer">ModuleScript<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound" style="color:gray;vertical-align:middle;margin-left:2px"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></code><code class="purple_ieR2">,</code></div><div class="inset_uKQm"><code>parent<!-- -->: </code><code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="https://developer.roblox.com/en-us/api-reference/datatype/Instance" target="_blank" rel="noopener noreferrer">Instance<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound" style="color:gray;vertical-align:middle;margin-left:2px"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></code><code class="purple_ieR2">,</code></div><div class="inset_uKQm"><code>depth<!-- -->: </code><code class="blue_P4bS">number</code><code class="purple_ieR2">,</code></div><div class="inset_uKQm"><code>path<!-- -->: </code><code class="blue_P4bS">string</code></div><code class="purple_ieR2">)</code><code class="purple_ieR2"> → </code><code class="blue_P4bS">boolean</code></div><div>
 <p>Predicate function used by deep discovery helpers.</p>
 </div><h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="properties">Properties<a href="#properties" class="hash-link" aria-label="Direct link to Properties" title="Direct link to Properties" translate="no">​</a></h2><div class="divider_rE5g"></div><h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="Util"><code style="text-decoration:none">Util</code><a href="#Util" class="hash-link" aria-label="Direct link to Util" title="Direct link to Util" translate="no">​</a></h3><span class="badge_Ba2I" style="color:#e74c3c"><span class="badgeTooltip_cWXP">This item is read only and cannot be modified.</span><span class="badgeToolTipTail_H9D_"><svg xmlns="http://www.w3.org/2000/svg" height="300px" width="300px" fill="#e74c3c" x="0px" y="0px" viewBox="0 0 96 96"><path d="M70.354,15.662h-7.496H25.566c-3.282,0-5.19-0.776-5.728-1.169v-1.456c0.538-0.393,2.445-1.168,5.728-1.168h46.479V8H25.566  c-4.776,0-9.594,1.468-9.594,4.747v61.458C15.972,86.645,20.328,88,37.495,88h42.535V15.662H70.354z"></path></svg> <!-- -->Read Only</span></span><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/main/src/KnitServer.luau#L50"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code>KnitServer<!-- -->.<!-- -->Util<!-- -->:<!-- --> </code> <code class="blue_P4bS"><a style="text-decoration:underline;color:inherit" href="https://developer.roblox.com/en-us/api-reference/class/Folder" target="_blank" rel="noopener noreferrer">Folder<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound" style="color:gray;vertical-align:middle;margin-left:2px"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></code></div><div>
 <p>
@@ -237,7 +252,7 @@ Knit<span class="token punctuation">.</span><span class="token function">AddServ
 	<span class="token function">print</span><span class="token punctuation">(</span><span class="token string">"Knit started!"</span><span class="token punctuation">)</span>
 <span class="token keyword">end</span><span class="token punctuation">)</span><span class="token punctuation">:</span><span class="token function">catch</span><span class="token punctuation">(</span>warn<span class="token punctuation">)</span>
 </code></pre>
-</div><div class="divider_rE5g"></div><h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="OnStart"><code style="text-decoration:none">OnStart</code><a href="#OnStart" class="hash-link" aria-label="Direct link to OnStart" title="Direct link to OnStart" translate="no">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/main/src/KnitServer.luau#L425"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code>KnitServer<!-- -->.</code><code class="green_DgR4">OnStart</code><code>(</code><code>) → </code><code class="blue_P4bS">Promise</code></div><div>
+</div><div class="divider_rE5g"></div><h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="OnStart"><code style="text-decoration:none">OnStart</code><a href="#OnStart" class="hash-link" aria-label="Direct link to OnStart" title="Direct link to OnStart" translate="no">​</a></h3><div class="repositoryDetailsContainer_BPdw"><a class="sourceButton_sEho" href="https://github.com/Breezy1214/Knit/blob/main/src/KnitServer.luau#L422"><div class="sourceButtonText_Vh0m">&lt;/&gt;</div></a></div><div class="memberString_GwaU"><code>KnitServer<!-- -->.</code><code class="green_DgR4">OnStart</code><code>(</code><code>) → </code><code class="blue_P4bS">Promise</code></div><div>
 <p>
   Returns a promise that is resolved once Knit has started. This is useful
   for any code that needs to tie into Knit services but is not the script
@@ -435,7 +450,7 @@ Knit<span class="token punctuation">.</span><span class="token function">AddServ
             ],
             &quot;function_type&quot;: &quot;static&quot;,
             &quot;source&quot;: {
-                &quot;line&quot;: 425,
+                &quot;line&quot;: 422,
                 &quot;path&quot;: &quot;src/KnitServer.luau&quot;
             }
         }
@@ -493,7 +508,7 @@ Knit<span class="token punctuation">.</span><span class="token function">AddServ
         },
         {
             &quot;name&quot;: &quot;ServiceDef&quot;,
-            &quot;desc&quot;: &quot;Used to define a service when creating it.\n\nThe middleware tables provided will be used instead of the Knit-level\nmiddleware (if any). This allows fine-tuning each service&#x27;s middleware.\nThese can also be left out or `nil` to not include middleware.&quot;,
+            &quot;desc&quot;: &quot;Used to define a service when creating it.\n\n`DependsOn` lists the names of services whose `KnitInit` must run\nbefore this service&#x27;s `KnitInit`.\n\nThe middleware tables provided will be used instead of the Knit-level\nmiddleware (if any). This allows fine-tuning each service&#x27;s middleware.\nThese can also be left out or `nil` to not include middleware.&quot;,
             &quot;fields&quot;: [
                 {
                     &quot;name&quot;: &quot;Name&quot;,
@@ -511,13 +526,18 @@ Knit<span class="token punctuation">.</span><span class="token function">AddServ
                     &quot;desc&quot;: &quot;&quot;
                 },
                 {
+                    &quot;name&quot;: &quot;DependsOn&quot;,
+                    &quot;lua_type&quot;: &quot;{string}?&quot;,
+                    &quot;desc&quot;: &quot;&quot;
+                },
+                {
                     &quot;name&quot;: &quot;[any]&quot;,
                     &quot;lua_type&quot;: &quot;any&quot;,
                     &quot;desc&quot;: &quot;&quot;
                 }
             ],
             &quot;source&quot;: {
-                &quot;line&quot;: 42,
+                &quot;line&quot;: 46,
                 &quot;path&quot;: &quot;src/Types.luau&quot;
             }
         },
@@ -547,7 +567,7 @@ Knit<span class="token punctuation">.</span><span class="token function">AddServ
                 }
             ],
             &quot;source&quot;: {
-                &quot;line&quot;: 58,
+                &quot;line&quot;: 62,
                 &quot;path&quot;: &quot;src/Types.luau&quot;
             }
         },
@@ -567,22 +587,32 @@ Knit<span class="token punctuation">.</span><span class="token function">AddServ
                 }
             ],
             &quot;source&quot;: {
-                &quot;line&quot;: 71,
+                &quot;line&quot;: 75,
                 &quot;path&quot;: &quot;src/Types.luau&quot;
             }
         },
         {
             &quot;name&quot;: &quot;KnitOptions&quot;,
-            &quot;desc&quot;: &quot;- Middleware will apply to all services _except_ ones that define\ntheir own middleware.&quot;,
+            &quot;desc&quot;: &quot;- Middleware will apply to all services _except_ ones that define\ntheir own middleware.\n- `DeterministicStart` defaults to `false`. When `true`, the promise\nreturned by `Start` waits for every `KnitStart` to finish and rejects\nif any of them fail.\n- `OnStartError` is called with the service name and error whenever a\n`KnitInit` or `KnitStart` fails. If omitted, failures are logged with\n`warn` (with `DeterministicStart`, `KnitStart` failures are reported\nthrough the rejected promise instead).&quot;,
             &quot;fields&quot;: [
                 {
                     &quot;name&quot;: &quot;Middleware&quot;,
                     &quot;lua_type&quot;: &quot;Middleware?&quot;,
                     &quot;desc&quot;: &quot;&quot;
+                },
+                {
+                    &quot;name&quot;: &quot;DeterministicStart&quot;,
+                    &quot;lua_type&quot;: &quot;boolean?&quot;,
+                    &quot;desc&quot;: &quot;&quot;
+                },
+                {
+                    &quot;name&quot;: &quot;OnStartError&quot;,
+                    &quot;lua_type&quot;: &quot;((name: string, err: any) -&gt; ())?&quot;,
+                    &quot;desc&quot;: &quot;&quot;
                 }
             ],
             &quot;source&quot;: {
-                &quot;line&quot;: 84,
+                &quot;line&quot;: 97,
                 &quot;path&quot;: &quot;src/Types.luau&quot;
             }
         },
@@ -591,7 +621,7 @@ Knit<span class="token punctuation">.</span><span class="token function">AddServ
             &quot;desc&quot;: &quot;Predicate function used by deep discovery helpers.&quot;,
             &quot;lua_type&quot;: &quot;(moduleScript: ModuleScript, parent: Instance, depth: number, path: string) -&gt; boolean&quot;,
             &quot;source&quot;: {
-                &quot;line&quot;: 95,
+                &quot;line&quot;: 108,
                 &quot;path&quot;: &quot;src/Types.luau&quot;
             }
         },
@@ -611,7 +641,7 @@ Knit<span class="token punctuation">.</span><span class="token function">AddServ
                 }
             ],
             &quot;source&quot;: {
-                &quot;line&quot;: 103,
+                &quot;line&quot;: 116,
                 &quot;path&quot;: &quot;src/Types.luau&quot;
             }
         }
