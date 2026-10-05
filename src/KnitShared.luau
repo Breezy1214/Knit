@@ -37,7 +37,6 @@ function KnitShared.resolveStartOptions(options: any, defaultOptions: any): any
 
 	assert(typeof(options) == "table", `KnitOptions should be a table or nil; got {typeof(options)}`)
 
-	-- Copy so the caller's table is never mutated:
 	local resolved = table.clone(options)
 	for key, value in defaultOptions do
 		if resolved[key] == nil then
@@ -236,8 +235,6 @@ function KnitShared.runKnitInitSequential(
 		local index = 0
 
 		local function runFrom()
-			-- Iterate synchronous inits in a loop; only hop to a continuation when
-			-- an init returns a promise, so long chains don't deepen the stack.
 			while true do
 				index += 1
 				local item = orderedItems[index]
@@ -283,9 +280,6 @@ end
 
 function KnitShared.runKnitStartTracked(orderedItems: { any }, itemKind: string, onStartErrorFn: ((string, any) -> ())?)
 	return Promise.new(function(resolve, reject)
-		-- Starts at 1 so a KnitStart that finishes synchronously inside task.spawn
-		-- can't drop the count to zero before the remaining items are dispatched.
-		-- The extra count is released once the dispatch loop is done.
 		local pending = 1
 		local failures = {}
 

@@ -303,8 +303,6 @@ function KnitClient.Start(options: KnitClientOptions?)
 		return Promise.reject("Knit already started")
 	end
 
-	-- Validate everything up front so a bad call doesn't leave Knit
-	-- half-started and unable to be started again:
 	selectedOptions = KnitShared.resolveStartOptions(options, defaultOptions)
 
 	if selectedOptions.PerServiceMiddleware == nil then
@@ -341,7 +339,6 @@ function KnitClient.Start(options: KnitClientOptions?)
 
 	return KnitShared.runKnitInitSequential(orderedControllers, "controller", selectedOptions.OnStartError)
 		:andThen(function()
-			-- Start:
 			if selectedOptions.DeterministicStart then
 				return KnitShared.runKnitStartTracked(orderedControllers, "controller", selectedOptions.OnStartError)
 			else

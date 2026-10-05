@@ -348,8 +348,6 @@ function KnitServer.Start(options: KnitServerOptions?)
 		return Promise.reject("Knit already started")
 	end
 
-	-- Validate everything up front so a bad call doesn't leave Knit
-	-- half-started and unable to be started again:
 	selectedOptions = KnitShared.resolveStartOptions(options, defaultOptions)
 
 	KnitShared.validateStartOptions(selectedOptions)
@@ -365,7 +363,6 @@ function KnitServer.Start(options: KnitServerOptions?)
 	return Promise.new(function(resolve)
 		local knitMiddleware = if selectedOptions.Middleware ~= nil then selectedOptions.Middleware else {}
 
-		-- Bind remotes:
 		for _, service in orderedServices do
 			KnitShared.validateMiddleware(service.Middleware, `Service "{service.Name}" middleware`)
 
@@ -391,7 +388,6 @@ function KnitServer.Start(options: KnitServerOptions?)
 		resolve(KnitShared.runKnitInitSequential(orderedServices, "service", selectedOptions.OnStartError))
 	end)
 		:andThen(function()
-			-- Start:
 			if selectedOptions.DeterministicStart then
 				return KnitShared.runKnitStartTracked(orderedServices, "service", selectedOptions.OnStartError)
 			else
@@ -407,7 +403,6 @@ function KnitServer.Start(options: KnitServerOptions?)
 				onStartedComplete:Destroy()
 			end)
 
-			-- Expose service remotes to everyone:
 			knitRepServiceFolder.Parent = script.Parent
 		end)
 end
