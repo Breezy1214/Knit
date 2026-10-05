@@ -35,7 +35,7 @@ Once created, services and controllers persist for the lifetime of the session (
 
 ## Error Handling
 
-Errors that occur within `KnitInit` methods are captured as rejected promises. Handle them via `await()` or `catch()`:
+Errors that occur within `KnitInit` methods stop startup and are captured as rejected promises. Handle them via `await()` or `catch()`:
 
 ```lua
 local success, err = Knit.Start():await()
@@ -48,6 +48,18 @@ end
 Knit.Start():catch(function(err)
     warn(tostring(err))
 end)
+```
+
+Errors thrown by `KnitStart` methods do not stop other services or controllers from starting. By default they are logged with `warn`. With `DeterministicStart` enabled, they are collected and the promise returned by `Knit.Start()` rejects once every `KnitStart` has finished.
+
+To route failures to your own error reporting, pass an `OnStartError` callback. It receives the service or controller name and the error for every failed `KnitInit` or `KnitStart`:
+
+```lua
+Knit.Start({
+    OnStartError = function(name, err)
+        warn(`{name} failed:`, err)
+    end,
+}):catch(warn)
 ```
 
 ## Best Practices

@@ -31,9 +31,13 @@ export type ServerMiddleware = { ServerMiddlewareFn }
 	.Name string
 	.Client table?
 	.Middleware Middleware?
+	.DependsOn {string}?
 	.[any] any
 	@within KnitServer
 	Used to define a service when creating it.
+
+	`DependsOn` lists the names of services whose `KnitInit` must run
+	before this service's `KnitInit`.
 
 	The middleware tables provided will be used instead of the Knit-level
 	middleware (if any). This allows fine-tuning each service's middleware.
@@ -76,10 +80,19 @@ export type ServiceClient = {
 --[=[
 	@interface KnitOptions
 	.Middleware Middleware?
+	.DeterministicStart boolean?
+	.OnStartError ((name: string, err: any) -> ())?
 	@within KnitServer
 
 	- Middleware will apply to all services _except_ ones that define
 	their own middleware.
+	- `DeterministicStart` defaults to `false`. When `true`, the promise
+	returned by `Start` waits for every `KnitStart` to finish and rejects
+	if any of them fail.
+	- `OnStartError` is called with the service name and error whenever a
+	`KnitInit` or `KnitStart` fails. If omitted, failures are logged with
+	`warn` (with `DeterministicStart`, `KnitStart` failures are reported
+	through the rejected promise instead).
 ]=]
 export type KnitServerOptions = {
 	Middleware: MiddlewareServer?,
@@ -129,9 +142,13 @@ export type PerServiceMiddleware = { [string]: MiddlewareClient }
 --[=[
 	@interface ControllerDef
 	.Name string
+	.DependsOn {string}?
 	.[any] any
 	@within KnitClient
 	Used to define a controller when creating it.
+
+	`DependsOn` lists the names of controllers whose `KnitInit` must run
+	before this controller's `KnitInit`.
 ]=]
 export type ControllerDef = {
 	Name: string,
@@ -155,14 +172,23 @@ export type Controller = {
 	.ServicePromises boolean?
 	.Middleware Middleware?
 	.PerServiceMiddleware PerServiceMiddleware?
+	.DeterministicStart boolean?
+	.OnStartError ((name: string, err: any) -> ())?
 	@within KnitClient
 
 	- `ServicePromises` defaults to `true` and indicates if service methods use promises.
 	- Each service will go through the defined middleware, unless the service
 	has middleware defined in `PerServiceMiddleware`.
+	- `DeterministicStart` defaults to `false`. When `true`, the promise
+	returned by `Start` waits for every `KnitStart` to finish and rejects
+	if any of them fail.
+	- `OnStartError` is called with the controller name and error whenever a
+	`KnitInit` or `KnitStart` fails. If omitted, failures are logged with
+	`warn` (with `DeterministicStart`, `KnitStart` failures are reported
+	through the rejected promise instead).
 ]=]
 export type KnitClientOptions = {
-	ServicePromises: boolean,
+	ServicePromises: boolean?,
 	Middleware: MiddlewareClient?,
 	PerServiceMiddleware: PerServiceMiddleware?,
 	DeterministicStart: boolean?,

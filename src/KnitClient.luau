@@ -96,7 +96,7 @@ local function createController(controllerDef: ControllerDef): Controller
 	assert(type(controllerDef) == "table", `Controller must be a table; got {type(controllerDef)}`)
 	assert(type(controllerDef.Name) == "string", `Controller.Name must be a string; got {type(controllerDef.Name)}`)
 	assert(#controllerDef.Name > 0, "Controller.Name must be a non-empty string")
-	assert(not DoesControllerExist(controllerDef.Name), `Controller {controllerDef.Name} already exists`)
+	assert(not DoesControllerExist(controllerDef.Name), `Controller "{controllerDef.Name}" already exists`)
 	assert(not started, `Controllers cannot be created after calling "Knit.Start()"`)
 
 	local controller = controllerDef :: Controller
@@ -157,7 +157,8 @@ function KnitClient.AddControllersDeep(
 ): { Controller }
 	assert(not started, `Controllers cannot be added after calling "Knit.Start()"`)
 
-	local predicate, deepSearchOptions = KnitShared.parseDeepSearchArgs(predicateOrOptions, options, "AddControllersDeep")
+	local predicate, deepSearchOptions =
+		KnitShared.parseDeepSearchArgs(predicateOrOptions, options, "AddControllersDeep")
 	local maxDepth = if deepSearchOptions and deepSearchOptions.MaxDepth then deepSearchOptions.MaxDepth else math.huge
 	local ignoreFolderPatterns = if deepSearchOptions and deepSearchOptions.IgnoreFolderPatterns
 		then deepSearchOptions.IgnoreFolderPatterns
@@ -302,16 +303,20 @@ function KnitClient.Start(options: KnitClientOptions?)
 		return Promise.reject("Knit already started")
 	end
 
-	started = true
-
-	table.freeze(controllers)
-	table.freeze(controllerOrder)
-
 	selectedOptions = KnitShared.resolveStartOptions(options, defaultOptions)
 
-	if type(selectedOptions.PerServiceMiddleware) ~= "table" then
+	if selectedOptions.PerServiceMiddleware == nil then
 		selectedOptions.PerServiceMiddleware = {}
 	end
+
+	assert(
+		type(selectedOptions.ServicePromises) == "boolean",
+		`KnitOptions.ServicePromises must be a boolean if provided; got {type(selectedOptions.ServicePromises)}`
+	)
+	assert(
+		type(selectedOptions.PerServiceMiddleware) == "table",
+		`KnitOptions.PerServiceMiddleware must be a table if provided; got {type(selectedOptions.PerServiceMiddleware)}`
+	)
 
 	KnitShared.validateStartOptions(selectedOptions)
 
@@ -327,13 +332,17 @@ function KnitClient.Start(options: KnitClientOptions?)
 
 	local orderedControllers = KnitShared.resolveDependencyOrder(controllerOrder, controllers, "controller")
 
+	started = true
+
+	table.freeze(controllers)
+	table.freeze(controllerOrder)
+
 	return KnitShared.runKnitInitSequential(orderedControllers, "controller", selectedOptions.OnStartError)
 		:andThen(function()
-			-- Start:
 			if selectedOptions.DeterministicStart then
 				return KnitShared.runKnitStartTracked(orderedControllers, "controller", selectedOptions.OnStartError)
 			else
-				KnitShared.runKnitStartFireAndForget(orderedControllers, selectedOptions.OnStartError)
+				KnitShared.runKnitStartFireAndForget(orderedControllers, "controller", selectedOptions.OnStartError)
 				return Promise.resolve()
 			end
 		end)

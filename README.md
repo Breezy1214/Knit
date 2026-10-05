@@ -259,8 +259,19 @@ Knit.Start({
 }):catch(function(err)
     -- err.Message = "KnitStart failed for N service(s)"
     -- err.Errors = { { Name = "ServiceName", Error = <traceback> }, ... }
-    warn(err.Message)
+    -- tostring(err) produces a readable summary of every failure
+    warn(tostring(err))
 end)
+```
+
+Without `DeterministicStart`, errors thrown by `KnitStart` are still logged with `warn`. Pass an `OnStartError` callback to handle `KnitInit`/`KnitStart` failures yourself:
+
+```lua
+Knit.Start({
+    OnStartError = function(name, err)
+        warn(`{name} failed to start:`, err)
+    end,
+}):catch(warn)
 ```
 
 ### Middleware
@@ -289,13 +300,15 @@ See the [Middleware](docs/middleware.md) documentation for per-service middlewar
 
 ### Service/Controller Creation
 
+`Knit.CreateService` and `Knit.CreateController` have been removed. Return a plain table from the module instead and load it with `AddServices` or `AddControllers`:
+
 ```lua
--- Legacy (still supported)
+-- Legacy (removed)
 local MoneyService = Knit.CreateService({
     Name = "MoneyService",
 })
 
--- Current (recommended)
+-- Current
 local MoneyService = {
     Name = "MoneyService",
 }
